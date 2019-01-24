@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class CombinatorTest extends TestCase
 {
-    public function lit_provider():array
+    public function lit_provider(): array
     {
         return [
             ["123", null, r::make("23", ["1"])],
@@ -21,13 +21,13 @@ class CombinatorTest extends TestCase
     /**
      * @dataProvider lit_provider
      */
-    public function test_lit(string $input, ?string $char, ?r $expected):void
+    public function test_lit(string $input, ?string $char, ?r $expected): void
     {
         $actual = p::lit($char)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function or_provider():array
+    public function or_provider(): array
     {
         $lit = function (?string $char = null): callable {
             return p::lit($char);
@@ -38,11 +38,7 @@ class CombinatorTest extends TestCase
             ["123", [$lit("2")], null],
             ["123", [$lit("1"), $lit("2")], r::make("23", ["1"])],
             ["123", [$lit("2"), $lit("1")], r::make("23", ["1"])],
-            [
-                "123",
-                [$lit("3"), $lit("2"), $lit("1")],
-                r::make("23", ["1"]),
-            ],
+            ["123", [$lit("3"), $lit("2"), $lit("1")], r::make("23", ["1"])],
             ["123", [$lit("2"), $lit("3")], null],
             ["", [$lit("2")], null],
             ["", [$lit("2"), $lit("3")], null],
@@ -52,13 +48,13 @@ class CombinatorTest extends TestCase
      * @dataProvider or_provider
      * @param array<int, callable(string):?r> $parsers
      */
-    public function test_or(string $input, array $parsers, ?r $expected):void
+    public function test_or(string $input, array $parsers, ?r $expected): void
     {
         $actual = p::or(...$parsers)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function and_provider():array
+    public function and_provider(): array
     {
         $lit = function (?string $char = null): callable {
             return p::lit($char);
@@ -67,11 +63,7 @@ class CombinatorTest extends TestCase
         return [
             ["123", [$lit("1")], r::make("23", ["1"])],
             ["123", [$lit("2")], null],
-            [
-                "123",
-                [$lit("1"), $lit("2")],
-                r::make("3", ["1", "2"]),
-            ],
+            ["123", [$lit("1"), $lit("2")], r::make("3", ["1", "2"])],
             [
                 "123",
                 [$lit("1"), $lit("2"), $lit("3")],
@@ -87,16 +79,13 @@ class CombinatorTest extends TestCase
      * @dataProvider and_provider
      * @param array<int, callable(string):?r> $parsers
      */
-    public function test_and(
-        string $input,
-        array $parsers,
-        ?r $expected
-    ):void {
+    public function test_and(string $input, array $parsers, ?r $expected): void
+    {
         $actual = p::and(...$parsers)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function many_provider():array
+    public function many_provider(): array
     {
         $lit = function (?string $char = null): callable {
             return p::lit($char);
@@ -116,12 +105,12 @@ class CombinatorTest extends TestCase
         string $input,
         callable $parser,
         r $expected
-    ):void {
+    ): void {
         $actual = p::many($parser)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function between_provider():array
+    public function between_provider(): array
     {
         $lit = function (?string $char = null): callable {
             return p::lit($char);
@@ -130,13 +119,7 @@ class CombinatorTest extends TestCase
         return [
             ["123", $lit("2"), $lit("2"), $lit("3"), null],
             ["123", $lit("1"), $lit("2"), $lit("2"), null],
-            [
-                "123",
-                $lit("1"),
-                $lit("2"),
-                $lit("3"),
-                r::make("", ["2"]),
-            ],
+            ["123", $lit("1"), $lit("2"), $lit("3"), r::make("", ["2"])],
         ];
     }
     /**
@@ -148,12 +131,12 @@ class CombinatorTest extends TestCase
         callable $middle,
         callable $right,
         ?r $expected
-    ):void {
+    ): void {
         $actual = p::between($left, $middle, $right)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function apply_provider():array
+    public function apply_provider(): array
     {
         $lit = function (?string $char = null): callable {
             return p::lit($char);
@@ -176,7 +159,7 @@ class CombinatorTest extends TestCase
         callable $f,
         callable $parser,
         ?r $expected
-    ):void {
+    ): void {
         $actual = p::apply($f, $parser)($input);
         $this->assertEquals($expected, $actual);
     }

@@ -66,15 +66,19 @@ final class Combinator
 
         return function (string $input) use ($head, $tail): ?r {
             $head = $head($input);
-            if (null === $head) return null;
+            if (null === $head) {
+                return null;
+            }
 
             $tail = self::and(...$tail)($head->unparsed);
-            if (null === $tail) return null;
+            if (null === $tail) {
+                return null;
+            }
 
             return r::make(
-                    $tail->unparsed,
-                    array_merge($head->parsed, $tail->parsed)
-                );
+                $tail->unparsed,
+                array_merge($head->parsed, $tail->parsed)
+            );
         };
     }
 
@@ -110,13 +114,19 @@ final class Combinator
     ): callable {
         return function (string $input) use ($left, $middle, $right): ?r {
             $left = $left($input);
-            if (null === $left) return null;
+            if (null === $left) {
+                return null;
+            }
 
             $middle = $middle($left->unparsed);
-            if (null === $middle) return null;
+            if (null === $middle) {
+                return null;
+            }
 
             $right = $right($middle->unparsed);
-            if (null === $right) return null;
+            if (null === $right) {
+                return null;
+            }
 
             return r::make($right->unparsed, $middle->parsed);
         };
