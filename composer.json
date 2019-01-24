@@ -1,0 +1,31 @@
+{
+    "name": "ylixir/phap",
+    "description": "Php Has Another Parser",
+    "type": "library",
+    "version": "0.0.1",
+    "authors": [
+        {
+            "name": "Jon Allen",
+            "email": "ylixir@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^7.2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Phap\\": "src/"
+        },
+        "files": []
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "UnitTest\\": "test/unit"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7",
+        "vimeo/psalm": "^3"
+    }
+}
