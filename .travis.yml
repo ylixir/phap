@@ -1,10 +1,10 @@
 language: php
 
 before_install:
-  - sh go init
+  - ./go init
 
 script:
-  - sh go format-verify
-  - sh go strict-types test src
-  - sh go lint
-  - sh go test
+  - ./go format-verify
+  - ./go strict-types test src
+  - ./go lint
+  - ./go test
