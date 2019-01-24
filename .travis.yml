@@ -8,3 +8,9 @@ script:
     - ./go strict-types test src
     - ./go lint
     - ./go test
+
+cache:
+    - vendor
+    - node_modules
+    - $HOME/.composer
+    - /nix
