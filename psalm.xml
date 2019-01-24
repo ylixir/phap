@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<psalm
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config"
+
+    totallyTyped="true"
+    strictBinaryOperands="true"
+    allowCoercionFromStringToClassConst="false"
+    allowStringToStandInForClass="false"
+    checkForThrowsDocblock="true"
+    cacheDirectory=".psalm-cache"
+>
+    <projectFiles>
+        <directory name="src" />
+        <directory name="test" />
+        <ignoreFiles>
+            <directory name="vendor" />
+            <directory name="node_modules" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <issueHandlers>
+        <!--PHPUnit works by throwing exceptions-->
+        <MissingThrowsDocblock>
+            <errorLevel type="suppress">
+                <directory name="test" />
+            </errorLevel>
+        </MissingThrowsDocblock>
+    </issueHandlers>
+</psalm>

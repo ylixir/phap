@@ -1,0 +1,13 @@
+{
+    "name": "phap",
+    "version": "0.0.1",
+    "description": "Php Has Another Parser",
+    "repository": "git@github.com:ylixir/phap.git",
+    "author": "Jon Allen <ylixir@gmail.com>",
+    "license": "LGPL-3.0-or-later",
+    "private": false,
+    "devDependencies": {
+        "@prettier/plugin-php": "^0.9.0",
+        "prettier": "^1.16"
+    }
+}

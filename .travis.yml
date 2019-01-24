@@ -1,0 +1,10 @@
+language: php
+
+before_install:
+  - sh go init
+
+script:
+  - sh go format-verify
+  - sh go strict-types test src
+  - sh go lint
+  - sh go test
