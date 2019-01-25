@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace UnitTests;
+namespace Test\Unit;
 
 use Phap\Combinator as p;
 use Phap\Result as r;

@@ -6,6 +6,15 @@ use Phap\Result as r;
 
 final class Combinator
 {
+    //convenience constants for passing functions to functions
+    const and = self::class . "::and";
+    const apply = self::class . "::apply";
+    const between = self::class . "::between";
+    const lit = self::class . "::lit";
+    const manny = self::class . "::manny";
+    const or = self::class . "::or";
+    const pop = self::class . "::pop";
+
     /**
      * @return callable(string):?r
      */
