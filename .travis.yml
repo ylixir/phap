@@ -25,4 +25,5 @@ cache:
         - $HOME/nix.store
 
 after_success:
-    - test "$TRAVIS_BRANCH" = "master" && ./go tag
+    - git remote set-url origin "https://${GITHUB_TOKEN}@github.com/ylixir/phap.git" > /dev/null 2>&1
+    - test "$TRAVIS_PULL_REQUEST" = “false” && test "$TRAVIS_BRANCH" = “master” && ./go tag > /dev/null 2>&1
