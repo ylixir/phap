@@ -6,31 +6,49 @@ use Phap\Result as r;
 
 final class Combinator
 {
+    //convenience constants for passing functions to functions
+    const and = self::class . "::and";
+    const apply = self::class . "::apply";
+    const between = self::class . "::between";
+    const lit = self::class . "::lit";
+    const manny = self::class . "::manny";
+    const or = self::class . "::or";
+    const pop = self::class . "::pop";
+
     /**
      * @return callable(string):?r
      */
-    public static function lit(?string $c = null): callable
+    public static function pop(): callable
     {
-        $pop = function (string $in): ?r {
-            if (strlen($in)) {
-                $head = [substr($in, 0, 1)];
-                $tail = substr($in, 1);
-                return r::make($tail, $head);
-            } else {
+        return function (string $in): ?r {
+            if ("" === $in) {
                 return null;
+            } else {
+                $head = [mb_substr($in, 0, 1)];
+                $tail = mb_substr($in, 1);
+                return r::make($tail, $head);
             }
         };
+    }
 
-        if (null === $c) {
-            return $pop;
+    /**
+     * @return callable(string):?r
+     */
+    public static function lit(string $c): callable
+    {
+        if ("" === $c) {
+            return /** @return null */ function (string $in): ?r {
+                    return null;
+                };
         }
 
-        // at this point we know that $c is _not_ null
+        return function (string $in) use ($c): ?r {
+            $c_len = strlen($c);
+            $head = mb_strcut($in, 0, $c_len);
+            $tail = mb_strcut($in, $c_len);
 
-        return function (string $in) use ($c, $pop): ?r {
-            $result = $pop($in);
-            if ($c === $result->parsed[0] ?? null) {
-                return $result;
+            if ($head === $c) {
+                return r::make($tail, [$head]);
             } else {
                 return null;
             }

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace UnitTests;
+namespace Test\Unit;
 
 use Phap\Combinator as p;
 use Phap\Result as r;
@@ -8,20 +8,45 @@ use PHPUnit\Framework\TestCase;
 
 class CombinatorTest extends TestCase
 {
-    public function lit_provider(): array
+    public function pop_provider(): array
     {
         return [
-            ["123", null, r::make("23", ["1"])],
-            ["123", "1", r::make("23", ["1"])],
-            ["123", "2", null],
-            ["", "2", null],
-            ["", null, null],
+            ["123", r::make("23", ["1"])],
+            ["😄∑♥😄", r::make("∑♥😄", ["😄"])],
+            ["", null],
         ];
     }
     /**
+     * @dataProvider pop_provider
+     */
+    public function test_pop(string $input, ?r $expected): void
+    {
+        $actual = p::pop()($input);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function lit_provider(): array
+    {
+        return [
+            ["123", "1", r::make("23", ["1"])],
+            ["123", "12", r::make("3", ["12"])],
+            ["123", "2", null],
+            ["😄∑♥😄", "😄", r::make("∑♥😄", ["😄"])],
+            ["😄∑♥😄", substr("😄", 0, 1), null],
+            ["😄∑♥😄", substr("😄", 1, 1), null],
+            ["", "2", null],
+            "This case would be gross without special handling" => [
+                "",
+                "",
+                null,
+            ],
+        ];
+    }
+
+    /**
      * @dataProvider lit_provider
      */
-    public function test_lit(string $input, ?string $char, ?r $expected): void
+    public function test_lit(string $input, string $char, ?r $expected): void
     {
         $actual = p::lit($char)($input);
         $this->assertEquals($expected, $actual);
@@ -29,19 +54,19 @@ class CombinatorTest extends TestCase
 
     public function or_provider(): array
     {
-        $lit = function (?string $char = null): callable {
-            return p::lit($char);
-        };
-
         return [
-            ["123", [$lit("1")], r::make("23", ["1"])],
-            ["123", [$lit("2")], null],
-            ["123", [$lit("1"), $lit("2")], r::make("23", ["1"])],
-            ["123", [$lit("2"), $lit("1")], r::make("23", ["1"])],
-            ["123", [$lit("3"), $lit("2"), $lit("1")], r::make("23", ["1"])],
-            ["123", [$lit("2"), $lit("3")], null],
-            ["", [$lit("2")], null],
-            ["", [$lit("2"), $lit("3")], null],
+            ["123", [p::lit("1")], r::make("23", ["1"])],
+            ["123", [p::lit("2")], null],
+            ["123", [p::lit("1"), p::lit("2")], r::make("23", ["1"])],
+            ["123", [p::lit("2"), p::lit("1")], r::make("23", ["1"])],
+            [
+                "123",
+                [p::lit("3"), p::lit("2"), p::lit("1")],
+                r::make("23", ["1"]),
+            ],
+            ["123", [p::lit("2"), p::lit("3")], null],
+            ["", [p::lit("2")], null],
+            ["", [p::lit("2"), p::lit("3")], null],
         ];
     }
     /**
@@ -56,23 +81,19 @@ class CombinatorTest extends TestCase
 
     public function and_provider(): array
     {
-        $lit = function (?string $char = null): callable {
-            return p::lit($char);
-        };
-
         return [
-            ["123", [$lit("1")], r::make("23", ["1"])],
-            ["123", [$lit("2")], null],
-            ["123", [$lit("1"), $lit("2")], r::make("3", ["1", "2"])],
+            ["123", [p::lit("1")], r::make("23", ["1"])],
+            ["123", [p::lit("2")], null],
+            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
             [
                 "123",
-                [$lit("1"), $lit("2"), $lit("3")],
+                [p::lit("1"), p::lit("2"), p::lit("3")],
                 r::make("", ["1", "2", "3"]),
             ],
-            ["123", [$lit("2"), $lit("1")], null],
-            ["123", [$lit("2"), $lit("3")], null],
-            ["", [$lit("2")], null],
-            ["", [$lit("2"), $lit("3")], null],
+            ["123", [p::lit("2"), p::lit("1")], null],
+            ["123", [p::lit("2"), p::lit("3")], null],
+            ["", [p::lit("2")], null],
+            ["", [p::lit("2"), p::lit("3")], null],
         ];
     }
     /**
@@ -87,15 +108,11 @@ class CombinatorTest extends TestCase
 
     public function many_provider(): array
     {
-        $lit = function (?string $char = null): callable {
-            return p::lit($char);
-        };
-
         return [
-            ["123", $lit("1"), r::make("23", ["1"])],
-            ["123", $lit("2"), r::make("123", [])],
-            ["1123", $lit("1"), r::make("23", ["1", "1"])],
-            ["1123", $lit("2"), r::make("1123", [])],
+            ["123", p::lit("1"), r::make("23", ["1"])],
+            ["123", p::lit("2"), r::make("123", [])],
+            ["1123", p::lit("1"), r::make("23", ["1", "1"])],
+            ["1123", p::lit("2"), r::make("1123", [])],
         ];
     }
     /**
@@ -112,14 +129,10 @@ class CombinatorTest extends TestCase
 
     public function between_provider(): array
     {
-        $lit = function (?string $char = null): callable {
-            return p::lit($char);
-        };
-
         return [
-            ["123", $lit("2"), $lit("2"), $lit("3"), null],
-            ["123", $lit("1"), $lit("2"), $lit("2"), null],
-            ["123", $lit("1"), $lit("2"), $lit("3"), r::make("", ["2"])],
+            ["123", p::lit("2"), p::lit("2"), p::lit("3"), null],
+            ["123", p::lit("1"), p::lit("2"), p::lit("2"), null],
+            ["123", p::lit("1"), p::lit("2"), p::lit("3"), r::make("", ["2"])],
         ];
     }
     /**
@@ -138,17 +151,14 @@ class CombinatorTest extends TestCase
 
     public function apply_provider(): array
     {
-        $lit = function (?string $char = null): callable {
-            return p::lit($char);
-        };
         $toint = function (array $i): array {
             return array_map('intval', $i);
         };
 
         return [
-            ["123", $toint, $lit("2"), null],
-            ["123", $toint, $lit("1"), r::make("23", [1])],
-            ["123", $toint, $lit("1"), r::make("23", ["1"])],
+            ["123", $toint, p::lit("2"), null],
+            ["123", $toint, p::lit("1"), r::make("23", [1])],
+            ["123", $toint, p::lit("1"), r::make("23", ["1"])],
         ];
     }
     /**
