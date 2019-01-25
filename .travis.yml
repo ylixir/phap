@@ -1,6 +1,9 @@
-language: php
+language: nix
 
 before_install:
+    - sudo mkdir -p /etc/nix
+    - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
+    - echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
     - ./go init
 
 script:
@@ -9,8 +12,17 @@ script:
     - ./go lint
     - ./go test
 
+before_cache:
+    - mkdir -p $HOME/nix.store
+    - nix copy --to file://$HOME/nix.store -f default.nix buildInputs
+
 cache:
-    - vendor
-    - node_modules
-    - $HOME/.composer
-    - /nix
+    directories:
+        - vendor
+        - node_modules
+        - $HOME/.composer
+        - $HOME/.cache/yarn
+        - $HOME/nix.store
+
+after_success:
+    - test "$TRAVIS_BRANCH" = "master" && ./go tag
