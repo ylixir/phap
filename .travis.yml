@@ -10,7 +10,12 @@ script:
     - ./go test
 
 cache:
-    - vendor
-    - node_modules
-    - $HOME/.composer
-    - /nix
+    directories:
+        - vendor
+        - node_modules
+        - $HOME/.composer
+        - $HOME/.cache/yarn
+        - /nix
+
+after_success:
+    - test "$TRAVIS_BRANCH" = "master" && ./go tag

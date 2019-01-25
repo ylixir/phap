@@ -1,3 +1,6 @@
 /vendor/
 /node_modules/
 /.psalm-cache/
+
+yarn.lock
+composer.lock
