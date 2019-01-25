@@ -1,4 +1,4 @@
-language: php
+language: nix
 
 before_install:
     - sudo mkdir -p /etc/nix
