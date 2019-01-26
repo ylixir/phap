@@ -49,4 +49,75 @@ class Examples extends TestCase
         $parse = self::integer_parser();
         static::assertEquals($expected, $parse($in));
     }
+
+    public static function interpolate_string(
+        string $s,
+        array $keyValues
+    ): string {
+        if ([] === $keyValues) {
+            return $s;
+        }
+
+        $open = p::and(p::lit("{{"), p::many(p::lit(" ")));
+        $close = p::and(p::many(p::lit(" ")), p::lit("}}"));
+        $key = p::or(...array_map(p::lit, array_keys($keyValues)));
+        $interpolate = p::between($open, $key, $close);
+
+        $keysToValues = function (array $keys) use ($keyValues): array {
+            $v = [];
+            foreach ($keys as $k) {
+                $v[] = $keyValues[$k];
+            }
+            return $v;
+        };
+
+        $value = p::apply($keysToValues, $interpolate);
+        $munch = p::many(p::or($value, p::pop));
+
+        return implode("", $munch($s)->parsed);
+    }
+
+    public function interpolation_provider(): array
+    {
+        return [
+            ["abc", [], "abc"],
+            ["a{{b}}c", [], "abc"],
+            [
+                "a{{d}}c",
+                ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
+                "a{{d}}c",
+            ],
+            /*
+            ["a{{b}}c", ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'], "abarc"],
+            [
+                "a {{b}} c",
+                ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
+                "a bar c",
+            ],
+            ["a{{ b}}c", ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'], "abarc"],
+            ["a{{b }}c", ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'], "abarc"],
+            [
+                "a{{     b   }}c",
+                ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
+                "abarc",
+            ],
+            [
+                "{{a}}{{b}}{{c}}",
+                ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
+                "foobarhello",
+            ],
+            */
+        ];
+    }
+    /**
+     * @dataProvider interpolation_provider
+     */
+    public function test_interpolation(
+        string $s,
+        array $kv,
+        string $expected
+    ): void {
+        $actual = self::interpolate_string($s, $kv);
+        static::assertSame($expected, $actual);
+    }
 }
