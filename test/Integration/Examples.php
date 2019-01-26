@@ -72,7 +72,7 @@ class Examples extends TestCase
         };
 
         $value = p::apply($keysToValues, $interpolate);
-        $munch = p::many(p::or($value, p::pop));
+        $munch = p::many(p::or($value, p::pop()));
 
         return implode("", $munch($s)->parsed);
     }
@@ -81,13 +81,12 @@ class Examples extends TestCase
     {
         return [
             ["abc", [], "abc"],
-            ["a{{b}}c", [], "abc"],
+            ["a{{b}}c", [], "a{{b}}c"],
             [
                 "a{{d}}c",
                 ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
                 "a{{d}}c",
             ],
-            /*
             ["a{{b}}c", ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'], "abarc"],
             [
                 "a {{b}} c",
@@ -106,7 +105,6 @@ class Examples extends TestCase
                 ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
                 "foobarhello",
             ],
-            */
         ];
     }
     /**
