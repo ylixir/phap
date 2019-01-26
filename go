@@ -115,10 +115,10 @@ function lint {
 }
 
 function test-debug {
-    debug -c ./vendor/bin/phpunit
+    debug -c ./vendor/bin/phpunit "${@}"
 }
 function test {
-    run -c ./vendor/bin/phpunit
+    run -c ./vendor/bin/phpunit "${@}"
 }
 
 function check {
