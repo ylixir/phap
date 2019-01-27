@@ -124,7 +124,7 @@ function test {
 function check {
     test \
     && lint \
-    && format-verify \
+    && format \
     && strict-types tests src
 }
 

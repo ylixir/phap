@@ -77,17 +77,17 @@ class Examples extends TestCase
 
         //function to convert some keys to values
         $keysToValues =
-        /**
-         * @param array<int, string> $keys
-         * @return array<int, string>
-         */
-        function (array $keys) use ($keyValues): array {
-            $v = [];
-            foreach ($keys as $k) {
-                /** @var string */$v[] = $keyValues[$k];
-            }
-            return $v;
-        };
+            /**
+             * @param array<int, string> $keys
+             * @return array<int, string>
+             */
+            function (array $keys) use ($keyValues): array {
+                $v = [];
+                foreach ($keys as $k) {
+                    /** @var string */ $v[] = $keyValues[$k];
+                }
+                return $v;
+            };
 
         // convert the inperpolated key tokens to their values
         $value = p::apply($keysToValues, $interpolate);
@@ -96,7 +96,7 @@ class Examples extends TestCase
         $munch = p::many(p::or($value, p::pop()));
 
         //parse it by passing the string to $munch
-        return implode("", $munch($s)->parsed??[$s]);
+        return implode("", $munch($s)->parsed ?? [$s]);
     }
 
     public function interpolation_provider(): array
