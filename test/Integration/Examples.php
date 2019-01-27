@@ -50,31 +50,53 @@ class Examples extends TestCase
         static::assertEquals($expected, $parse($in));
     }
 
+    /**
+     * @var string[] $keyValues the keys are in the string between moustaches
+     */
     public static function interpolate_string(
         string $s,
         array $keyValues
     ): string {
+        //don't even bother if there ase no keys to interpolate
         if ([] === $keyValues) {
             return $s;
         }
 
-        $open = p::and(p::lit("{{"), p::many(p::lit(" ")));
-        $close = p::and(p::many(p::lit(" ")), p::lit("}}"));
-        $key = p::or(...array_map(p::lit, array_keys($keyValues)));
+        // find the interpolation begin and end tokens
+        $spaces = p::many(p::lit(" "));
+        $open = p::and(p::lit("{{"), $spaces);
+        $close = p::and($spaces, p::lit("}}"));
+
+        //parse the interpolation strings: only match keys passed in
+        /** @var array<int,callable(string):?r> */
+        $keyParsers = array_map(p::lit, array_keys($keyValues));
+        $key = p::or(...$keyParsers);
+
+        //extract the key from between the start and end tokens
         $interpolate = p::between($open, $key, $close);
 
-        $keysToValues = function (array $keys) use ($keyValues): array {
+        //function to convert some keys to values
+        $keysToValues =
+        /**
+         * @param array<int, string> $keys
+         * @return array<int, string>
+         */
+        function (array $keys) use ($keyValues): array {
             $v = [];
             foreach ($keys as $k) {
-                $v[] = $keyValues[$k];
+                /** @var string */$v[] = $keyValues[$k];
             }
             return $v;
         };
 
+        // convert the inperpolated key tokens to their values
         $value = p::apply($keysToValues, $interpolate);
+
+        //try to interpolate, if we can't just eat a code point and try again
         $munch = p::many(p::or($value, p::pop()));
 
-        return implode("", $munch($s)->parsed);
+        //parse it by passing the string to $munch
+        return implode("", $munch($s)->parsed??[$s]);
     }
 
     public function interpolation_provider(): array
