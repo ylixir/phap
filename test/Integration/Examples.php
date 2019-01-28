@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class Examples extends TestCase
 {
-    public static function integer_parser(): callable
+    public static function integerParser(): callable
     {
         $p = p::class;
 
@@ -29,7 +29,7 @@ class Examples extends TestCase
         return $integer;
     }
 
-    public function parse_integer_provider(): array
+    public function parseIntegerProvider(): array
     {
         return [
             ["abc", null],
@@ -42,18 +42,18 @@ class Examples extends TestCase
         ];
     }
     /**
-     * @dataProvider parse_integer_provider
+     * @dataProvider parseIntegerProvider
      */
-    public function test_parse_integer(string $in, ?r $expected): void
+    public function testParseInteger(string $in, ?r $expected): void
     {
-        $parse = self::integer_parser();
+        $parse = self::integerParser();
         static::assertEquals($expected, $parse($in));
     }
 
     /**
      * @var string[] $keyValues the keys are in the string between moustaches
      */
-    public static function interpolate_string(
+    public static function interpolateString(
         string $s,
         array $keyValues
     ): string {
@@ -99,7 +99,7 @@ class Examples extends TestCase
         return implode("", $munch($s)->parsed ?? [$s]);
     }
 
-    public function interpolation_provider(): array
+    public function interpolationProvider(): array
     {
         return [
             ["abc", [], "abc"],
@@ -130,14 +130,14 @@ class Examples extends TestCase
         ];
     }
     /**
-     * @dataProvider interpolation_provider
+     * @dataProvider interpolationProvider
      */
-    public function test_interpolation(
+    public function testInterpolation(
         string $s,
         array $kv,
         string $expected
     ): void {
-        $actual = self::interpolate_string($s, $kv);
+        $actual = self::interpolateString($s, $kv);
         static::assertSame($expected, $actual);
     }
 }

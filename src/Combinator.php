@@ -43,9 +43,9 @@ final class Combinator
         }
 
         return function (string $in) use ($c): ?r {
-            $c_len = strlen($c);
-            $head = mb_strcut($in, 0, $c_len);
-            $tail = mb_strcut($in, $c_len);
+            $cLen = strlen($c);
+            $head = mb_strcut($in, 0, $cLen);
+            $tail = mb_strcut($in, $cLen);
 
             if ($head === $c) {
                 return r::make($tail, [$head]);

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class CombinatorTest extends TestCase
 {
-    public function pop_provider(): array
+    public function popProvider(): array
     {
         return [
             ["123", r::make("23", ["1"])],
@@ -17,15 +17,15 @@ class CombinatorTest extends TestCase
         ];
     }
     /**
-     * @dataProvider pop_provider
+     * @dataProvider popProvider
      */
-    public function test_pop(string $input, ?r $expected): void
+    public function testPop(string $input, ?r $expected): void
     {
         $actual = p::pop()($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function lit_provider(): array
+    public function litProvider(): array
     {
         return [
             ["123", "1", r::make("23", ["1"])],
@@ -44,15 +44,15 @@ class CombinatorTest extends TestCase
     }
 
     /**
-     * @dataProvider lit_provider
+     * @dataProvider litProvider
      */
-    public function test_lit(string $input, string $char, ?r $expected): void
+    public function testLit(string $input, string $char, ?r $expected): void
     {
         $actual = p::lit($char)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function or_provider(): array
+    public function orProvider(): array
     {
         return [
             ["123", [p::lit("1")], r::make("23", ["1"])],
@@ -70,16 +70,16 @@ class CombinatorTest extends TestCase
         ];
     }
     /**
-     * @dataProvider or_provider
+     * @dataProvider orProvider
      * @param array<int, callable(string):?r> $parsers
      */
-    public function test_or(string $input, array $parsers, ?r $expected): void
+    public function testOr(string $input, array $parsers, ?r $expected): void
     {
         $actual = p::or(...$parsers)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function and_provider(): array
+    public function andProvider(): array
     {
         return [
             ["123", [p::lit("1")], r::make("23", ["1"])],
@@ -97,16 +97,16 @@ class CombinatorTest extends TestCase
         ];
     }
     /**
-     * @dataProvider and_provider
+     * @dataProvider andProvider
      * @param array<int, callable(string):?r> $parsers
      */
-    public function test_and(string $input, array $parsers, ?r $expected): void
+    public function testAnd(string $input, array $parsers, ?r $expected): void
     {
         $actual = p::and(...$parsers)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function many_provider(): array
+    public function manyProvider(): array
     {
         return [
             ["123", p::lit("1"), r::make("23", ["1"])],
@@ -116,18 +116,15 @@ class CombinatorTest extends TestCase
         ];
     }
     /**
-     * @dataProvider many_provider
+     * @dataProvider manyProvider
      */
-    public function test_many(
-        string $input,
-        callable $parser,
-        r $expected
-    ): void {
+    public function testMany(string $input, callable $parser, r $expected): void
+    {
         $actual = p::many($parser)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function between_provider(): array
+    public function betweenProvider(): array
     {
         return [
             ["123", p::lit("2"), p::lit("2"), p::lit("3"), null],
@@ -136,9 +133,9 @@ class CombinatorTest extends TestCase
         ];
     }
     /**
-     * @dataProvider between_provider
+     * @dataProvider betweenProvider
      */
-    public function test_between(
+    public function testBetween(
         string $input,
         callable $left,
         callable $middle,
@@ -149,7 +146,7 @@ class CombinatorTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function apply_provider(): array
+    public function applyProvider(): array
     {
         $toint = function (array $i): array {
             return array_map('intval', $i);
@@ -162,9 +159,9 @@ class CombinatorTest extends TestCase
         ];
     }
     /**
-     * @dataProvider apply_provider
+     * @dataProvider applyProvider
      */
-    public function test_apply(
+    public function testApply(
         string $input,
         callable $f,
         callable $parser,
