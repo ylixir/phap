@@ -101,6 +101,7 @@ class Examples extends TestCase
         return [
             ["abc", [], "abc"],
             ["a{{b}}c", [], "a{{b}}c"],
+            ["a{{b}}c", ['b' => 'abc'], "aabcc"],
             [
                 "a{{d}}c",
                 ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
