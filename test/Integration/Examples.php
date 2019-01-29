@@ -8,23 +8,20 @@ use PHPUnit\Framework\TestCase;
 
 class Examples extends TestCase
 {
-    public static function integerParser(): callable
+    public static function integerParser(): p
     {
-        $p = p::class;
-
-        /** @var array<int,callable(string):?r> */
-        $litDigits = array_map(p::lit, range("0", "9"));
-
         //any digit will do
-        $anyDigit = p::or(...$litDigits);
+        /** @var array<int,p> */
+        $litDigits = array_map(p::lit, range("1", "9"));
+        $anyDigit = p::lit("0")->or(...$litDigits);
 
         //we can have as many as we want, but we need at least one
-        $allDigits = p::and($anyDigit, p::many($anyDigit));
+        $allDigits = $anyDigit->and(p::many($anyDigit));
 
         //convert the digits to actual integers
-        $integer = p::apply(function (array $digits): array {
+        $integer = $allDigits->apply(function (array $digits): array {
             return [(int) implode('', $digits)];
-        }, $allDigits);
+        });
 
         return $integer;
     }
@@ -64,16 +61,16 @@ class Examples extends TestCase
 
         // find the interpolation begin and end tokens
         $spaces = p::many(p::lit(" "));
-        $open = p::and(p::lit("{{"), $spaces);
-        $close = p::and($spaces, p::lit("}}"));
+        $open = p::lit("{{")->and($spaces);
+        $close = $spaces->and(p::lit("}}"));
 
         //parse the interpolation strings: only match keys passed in
-        /** @var array<int,callable(string):?r> */
+        /** @var array<int,p> */
         $keyParsers = array_map(p::lit, array_keys($keyValues));
-        $key = p::or(...$keyParsers);
+        $key = $keyParsers[0]->or(...array_slice($keyParsers, 1));
 
         //extract the key from between the start and end tokens
-        $interpolate = p::between($open, $key, $close);
+        $interpolate = $key->between($open, $close);
 
         //function to convert some keys to values
         $keysToValues =
@@ -90,10 +87,10 @@ class Examples extends TestCase
             };
 
         // convert the inperpolated key tokens to their values
-        $value = p::apply($keysToValues, $interpolate);
+        $value = $interpolate->apply($keysToValues);
 
         //try to interpolate, if we can't just eat a code point and try again
-        $munch = p::many(p::or($value, p::pop()));
+        $munch = p::many($value->or(p::pop()));
 
         //parse it by passing the string to $munch
         return implode("", $munch($s)->parsed ?? [$s]);

@@ -71,11 +71,11 @@ class CombinatorTest extends TestCase
     }
     /**
      * @dataProvider orProvider
-     * @param array<int, callable(string):?r> $parsers
+     * @param array<int, p> $parsers
      */
     public function testOr(string $input, array $parsers, ?r $expected): void
     {
-        $actual = p::or(...$parsers)($input);
+        $actual = $parsers[0]->or(...array_slice($parsers, 1))($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -98,11 +98,11 @@ class CombinatorTest extends TestCase
     }
     /**
      * @dataProvider andProvider
-     * @param array<int, callable(string):?r> $parsers
+     * @param array<int, p> $parsers
      */
     public function testAnd(string $input, array $parsers, ?r $expected): void
     {
-        $actual = p::and(...$parsers)($input);
+        $actual = $parsers[0]->and(...array_slice($parsers, 1))($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -118,7 +118,7 @@ class CombinatorTest extends TestCase
     /**
      * @dataProvider manyProvider
      */
-    public function testMany(string $input, callable $parser, r $expected): void
+    public function testMany(string $input, p $parser, r $expected): void
     {
         $actual = p::many($parser)($input);
         $this->assertEquals($expected, $actual);
@@ -137,12 +137,12 @@ class CombinatorTest extends TestCase
      */
     public function testBetween(
         string $input,
-        callable $left,
-        callable $middle,
-        callable $right,
+        p $left,
+        p $middle,
+        p $right,
         ?r $expected
     ): void {
-        $actual = p::between($left, $middle, $right)($input);
+        $actual = $middle->between($left, $right)($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -164,10 +164,10 @@ class CombinatorTest extends TestCase
     public function testApply(
         string $input,
         callable $f,
-        callable $parser,
+        p $parser,
         ?r $expected
     ): void {
-        $actual = p::apply($f, $parser)($input);
+        $actual = $parser->apply($f)($input);
         $this->assertEquals($expected, $actual);
     }
 }
