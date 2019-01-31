@@ -2,7 +2,8 @@
     "name": "ylixir/phap",
     "description": "Php Has Another Parser",
     "type": "library",
-    "version": "0.3.0",
+    "version": "0.3.1",
+    "license": "LGPL-3.0-or-later",
     "authors": [
         {
             "name": "Jon Allen",

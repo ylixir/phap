@@ -111,7 +111,7 @@ function strict-types {
 }
 
 function lint {
-    run -c ./vendor/bin/psalm "${@}"
+    run -c ./vendor/bin/psalm --threads=4 "${@}"
 }
 
 function test-debug {
