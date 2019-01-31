@@ -7,20 +7,25 @@ use Phap\Result as r;
 final class Combinator
 {
     //convenience constants for passing functions to functions
-    const and = self::class . "::and";
-    const apply = self::class . "::apply";
-    const between = self::class . "::between";
     const lit = self::class . "::lit";
-    const manny = self::class . "::manny";
-    const or = self::class . "::or";
+    const many = self::class . "::many";
     const pop = self::class . "::pop";
 
-    /**
-     * @return callable(string):?r
-     */
-    public static function pop(): callable
+    /** @var callable(string):?r */ private $parse;
+
+    /** @param callable(string):?r $p */
+    private function __construct(callable $p)
     {
-        return function (string $in): ?r {
+        $this->parse = $p;
+    }
+
+    public function __invoke(string $s): ?r
+    {
+        return ($this->parse)($s);
+    }
+    public static function pop(): self
+    {
+        return new self(function (string $in): ?r {
             if ("" === $in) {
                 return null;
             } else {
@@ -28,67 +33,68 @@ final class Combinator
                 $tail = mb_substr($in, 1);
                 return r::make($tail, $head);
             }
-        };
+        });
     }
 
-    /**
-     * @return callable(string):?r
-     */
-    public static function lit(string $c): callable
+    public static function lit(string $c): self
     {
         if ("" === $c) {
-            return /** @return null */ function (string $in): ?r {
+            return /** @return null */ new self(function (string $in): ?r {
                     return null;
-                };
+                });
         }
 
-        return function (string $in) use ($c): ?r {
-            $c_len = strlen($c);
-            $head = mb_strcut($in, 0, $c_len);
-            $tail = mb_strcut($in, $c_len);
+        return new self(function (string $in) use ($c): ?r {
+            $cLen = strlen($c);
+            $head = mb_strcut($in, 0, $cLen);
+            $tail = mb_strcut($in, $cLen);
 
             if ($head === $c) {
                 return r::make($tail, [$head]);
             } else {
                 return null;
             }
-        };
+        });
     }
 
-    /**
-     * @param callable(string):?r $head
-     * @param array<int, callable(string):?r> $tail
-     * @return callable(string):?Result
-     */
-    public static function or(callable $head, callable ...$tail): callable
-    {
-        if ([] === $tail) {
-            return $head;
-        }
+    //if we want __call to intercept functions, then apparently
+    //there can't be static functions because php will just call them
 
-        return function (string $input) use ($head, $tail): ?r {
-            return $head($input) ?? self::or(...$tail)($input);
-        };
+    public function or(self ...$tail): self
+    {
+        switch (count($tail)) {
+            case 0:
+                return $this;
+            case 1:
+                $tail = $tail[0];
+                break;
+            default:
+                $tail = $tail[0]->or(...array_slice($tail, 1));
+        }
+        return new self(function (string $input) use ($tail): ?r {
+            return ($this->parse)($input) ?? $tail($input);
+        });
     }
 
-    /**
-     * @param callable(string):?r $head
-     * @param array<int, callable(string):?r> $tail
-     * @return callable(string):?r
-     */
-    public static function and(callable $head, callable ...$tail): callable
+    public function and(self ...$tail): self
     {
-        if ([] === $tail) {
-            return $head;
+        switch (count($tail)) {
+            case 0:
+                return $this;
+            case 1:
+                $tail = $tail[0];
+                break;
+            default:
+                $tail = $tail[0]->and(...array_slice($tail, 1));
         }
 
-        return function (string $input) use ($head, $tail): ?r {
-            $head = $head($input);
+        return new self(function (string $input) use ($tail): ?r {
+            $head = ($this->parse)($input);
             if (null === $head) {
                 return null;
             }
 
-            $tail = self::and(...$tail)($head->unparsed);
+            $tail = $tail($head->unparsed);
             if (null === $tail) {
                 return null;
             }
@@ -97,16 +103,12 @@ final class Combinator
                 $tail->unparsed,
                 array_merge($head->parsed, $tail->parsed)
             );
-        };
+        });
     }
 
-    /**
-     * @param callable(string):?r $parser
-     * @return callable(string):?r
-     */
-    public static function many(callable $parser): callable
+    public static function many(self $parser): self
     {
-        return function (string $input) use ($parser): r {
+        return new self(function (string $input) use ($parser): r {
             $parsed = [];
             $result = $parser($input);
             while (null !== $result) {
@@ -116,27 +118,18 @@ final class Combinator
             }
 
             return r::make($input, $parsed);
-        };
+        });
     }
 
-    /**
-     * @param callable(string):?r $left
-     * @param callable(string):?r $middle
-     * @param callable(string):?r $right
-     * @return callable(string):?r
-     */
-    public static function between(
-        callable $left,
-        callable $middle,
-        callable $right
-    ): callable {
-        return function (string $input) use ($left, $middle, $right): ?r {
+    public function between(self $left, self $right): self
+    {
+        return new self(function (string $input) use ($left, $right): ?r {
             $left = $left($input);
             if (null === $left) {
                 return null;
             }
 
-            $middle = $middle($left->unparsed);
+            $middle = ($this->parse)($left->unparsed);
             if (null === $middle) {
                 return null;
             }
@@ -147,21 +140,19 @@ final class Combinator
             }
 
             return r::make($right->unparsed, $middle->parsed);
-        };
+        });
     }
 
     /**
      * @param callable(array):array $f
-     * @param callable(string):?r $parser
-     * @return callable(string):?r
      */
-    public static function apply(callable $f, callable $parser): callable
+    public function apply(callable $f): self
     {
-        return function (string $input) use ($f, $parser): ?r {
-            $result = $parser($input);
+        return new self(function (string $input) use ($f): ?r {
+            $result = ($this->parse)($input);
             return null === $result
                 ? null
                 : r::make($result->unparsed, $f($result->parsed));
-        };
+        });
     }
 }
