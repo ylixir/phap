@@ -75,8 +75,10 @@ class Examples extends TestCase
 
         // find the interpolation begin and end tokens
         $spaces = p::all(p::lit(" "));
-        $open = p::lit("{{")->with($spaces);
-        $close = $spaces->with(p::lit("}}"));
+        $open = p::lit("{{")
+            ->with($spaces)
+            ->drop();
+        $close = $spaces->with(p::lit("}}"))->drop();
 
         //parse the interpolation strings: only match keys passed in
         /** @var array<int,p> */
@@ -84,7 +86,7 @@ class Examples extends TestCase
         $key = $keyParsers[0]->or(...array_slice($keyParsers, 1));
 
         //extract the key from between the start and end tokens
-        $interpolate = $key->between($open, $close);
+        $interpolate = $open->with($key, $close);
 
         //function to convert some keys to values
         $keysToValues =

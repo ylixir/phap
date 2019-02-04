@@ -171,6 +171,21 @@ class CombinatorTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function dropProvider(): array
+    {
+        return [
+            ["12", p::pop(), r::make('2', [])],
+            ["12", p::lit("12"), r::make('', [])],
+        ];
+    }
+    /**
+     * @dataProvider dropProvider
+     */
+    public function testdrop(string $input, p $parser, ?r $expected): void
+    {
+        $actual = $parser->drop()($input);
+        $this->assertEquals($expected, $actual);
+    }
     public function endProvider(): array
     {
         return [

@@ -157,6 +157,19 @@ final class Combinator
         });
     }
 
+    public function drop(): self
+    {
+        return new self(function (string $in): ?r {
+            $r = $this($in);
+
+            if (null === $r) {
+                return null;
+            } else {
+                return r::make($r->unparsed, []);
+            }
+        });
+    }
+
     public function end(): self
     {
         return new self(function (string $in): ?r {
