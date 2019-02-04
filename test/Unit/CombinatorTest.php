@@ -120,7 +120,7 @@ class CombinatorTest extends TestCase
      */
     public function testMany(string $input, p $parser, r $expected): void
     {
-        $actual = p::many($parser)($input);
+        $actual = p::all($parser)($input);
         $this->assertEquals($expected, $actual);
     }
 

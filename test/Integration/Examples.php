@@ -16,7 +16,7 @@ class Examples extends TestCase
         $anyDigit = p::lit("0")->or(...$litDigits);
 
         //we can have as many as we want, but we need at least one
-        $allDigits = $anyDigit->with(p::many($anyDigit));
+        $allDigits = $anyDigit->with(p::all($anyDigit));
 
         //convert the digits to actual integers
         $integer = $allDigits->apply(function (array $digits): array {
@@ -60,7 +60,7 @@ class Examples extends TestCase
         }
 
         // find the interpolation begin and end tokens
-        $spaces = p::many(p::lit(" "));
+        $spaces = p::all(p::lit(" "));
         $open = p::lit("{{")->with($spaces);
         $close = $spaces->with(p::lit("}}"));
 
@@ -90,7 +90,7 @@ class Examples extends TestCase
         $value = $interpolate->apply($keysToValues);
 
         //try to interpolate, if we can't just eat a code point and try again
-        $munch = p::many($value->or(p::pop()));
+        $munch = p::all($value->or(p::pop()));
 
         //parse it by passing the string to $munch
         return implode("", $munch($s)->parsed ?? [$s]);

@@ -8,7 +8,7 @@ final class Combinator
 {
     //convenience constants for passing functions to functions
     const lit = self::class . "::lit";
-    const many = self::class . "::many";
+    const all = self::class . "::all";
     const pop = self::class . "::pop";
 
     /** @var callable(string):?r */ private $parse;
@@ -23,6 +23,7 @@ final class Combinator
     {
         return ($this->parse)($s);
     }
+
     public static function pop(): self
     {
         return new self(function (string $in): ?r {
@@ -106,7 +107,7 @@ final class Combinator
         });
     }
 
-    public static function many(self $parser): self
+    public static function all(self $parser): self
     {
         return new self(function (string $input) use ($parser): r {
             $parsed = [];
