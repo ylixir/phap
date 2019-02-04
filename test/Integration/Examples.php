@@ -16,7 +16,7 @@ class Examples extends TestCase
         $anyDigit = p::lit("0")->or(...$litDigits);
 
         //we can have as many as we want, but we need at least one
-        $allDigits = $anyDigit->and(p::many($anyDigit));
+        $allDigits = $anyDigit->with(p::many($anyDigit));
 
         //convert the digits to actual integers
         $integer = $allDigits->apply(function (array $digits): array {
@@ -61,8 +61,8 @@ class Examples extends TestCase
 
         // find the interpolation begin and end tokens
         $spaces = p::many(p::lit(" "));
-        $open = p::lit("{{")->and($spaces);
-        $close = $spaces->and(p::lit("}}"));
+        $open = p::lit("{{")->with($spaces);
+        $close = $spaces->with(p::lit("}}"));
 
         //parse the interpolation strings: only match keys passed in
         /** @var array<int,p> */

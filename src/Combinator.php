@@ -76,7 +76,7 @@ final class Combinator
         });
     }
 
-    public function and(self ...$tail): self
+    public function with(self ...$tail): self
     {
         switch (count($tail)) {
             case 0:
@@ -85,7 +85,7 @@ final class Combinator
                 $tail = $tail[0];
                 break;
             default:
-                $tail = $tail[0]->and(...array_slice($tail, 1));
+                $tail = $tail[0]->with(...array_slice($tail, 1));
         }
 
         return new self(function (string $input) use ($tail): ?r {

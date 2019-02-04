@@ -102,7 +102,7 @@ class CombinatorTest extends TestCase
      */
     public function testAnd(string $input, array $parsers, ?r $expected): void
     {
-        $actual = $parsers[0]->and(...array_slice($parsers, 1))($input);
+        $actual = $parsers[0]->with(...array_slice($parsers, 1))($input);
         $this->assertEquals($expected, $actual);
     }
 
