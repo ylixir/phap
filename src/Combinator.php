@@ -73,7 +73,7 @@ final class Combinator
                 $tail = $tail[0]->or(...array_slice($tail, 1));
         }
         return new self(function (string $input) use ($tail): ?r {
-            return ($this->parse)($input) ?? $tail($input);
+            return $this($input) ?? $tail($input);
         });
     }
 
@@ -90,7 +90,7 @@ final class Combinator
         }
 
         return new self(function (string $input) use ($tail): ?r {
-            $head = ($this->parse)($input);
+            $head = $this($input);
             if (null === $head) {
                 return null;
             }
@@ -130,7 +130,7 @@ final class Combinator
                 return null;
             }
 
-            $middle = ($this->parse)($left->unparsed);
+            $middle = $this($left->unparsed);
             if (null === $middle) {
                 return null;
             }
@@ -150,7 +150,7 @@ final class Combinator
     public function apply(callable $f): self
     {
         return new self(function (string $input) use ($f): ?r {
-            $result = ($this->parse)($input);
+            $result = $this($input);
             return null === $result
                 ? null
                 : r::make($result->unparsed, $f($result->parsed));
