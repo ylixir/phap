@@ -47,6 +47,20 @@ class Examples extends TestCase
         static::assertEquals($expected, $parse($in));
     }
 
+    public function parseEndedIntegerProvider(): array
+    {
+        return [["123", r::make("", [123])], ["12a", null]];
+    }
+    /**
+     * @dataProvider parseEndedIntegerProvider
+     */
+    public function testParseEndedInteger(string $in, ?r $expected): void
+    {
+        //we can use end to make sure we don't have extra garbage
+        $parse = self::integerParser()->end();
+        static::assertEquals($expected, $parse($in));
+    }
+
     /**
      * @var string[] $keyValues the keys are in the string between moustaches
      */

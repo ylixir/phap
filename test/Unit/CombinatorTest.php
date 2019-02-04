@@ -170,4 +170,20 @@ class CombinatorTest extends TestCase
         $actual = $parser->apply($f)($input);
         $this->assertEquals($expected, $actual);
     }
+
+    public function endProvider(): array
+    {
+        return [
+            ["12", p::pop(), null],
+            ["12", p::lit("12"), r::make('', ["12"])],
+        ];
+    }
+    /**
+     * @dataProvider endProvider
+     */
+    public function testEnd(string $input, p $parser, ?r $expected): void
+    {
+        $actual = $parser->end()($input);
+        $this->assertEquals($expected, $actual);
+    }
 }

@@ -156,4 +156,17 @@ final class Combinator
                 : r::make($result->unparsed, $f($result->parsed));
         });
     }
+
+    public function end(): self
+    {
+        return new self(function (string $in): ?r {
+            $r = $this($in);
+
+            if (null === $r || '' !== $r->unparsed) {
+                return null;
+            } else {
+                return $r;
+            }
+        });
+    }
 }
