@@ -124,28 +124,50 @@ class CombinatorTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function applyProvider(): array
+    public function reduceProvider(): array
     {
-        $toint = function (array $i): array {
-            return array_map('intval', $i);
-        };
+        $reduce = function (array $a, string $s): array {
+            if ('2' !== $s) {
+                $a[] = $s;
+            }
 
+            return $a;
+        };
         return [
-            ["123", $toint, p::lit("2"), null],
-            ["123", $toint, p::lit("1"), r::make("23", [1])],
-            ["123", $toint, p::lit("1"), r::make("23", ["1"])],
+            ["123", $reduce, p::lit("2"), null],
+            ["123", $reduce, p::all(p::pop()), r::make("", ["1", "3"])],
         ];
     }
     /**
-     * @dataProvider applyProvider
+     * @dataProvider reduceProvider
      */
-    public function testApply(
+    public function testReduce(
         string $input,
         callable $f,
         p $parser,
         ?r $expected
     ): void {
-        $actual = $parser->apply($f)($input);
+        $actual = $parser->reduce($f)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function mapProvider(): array
+    {
+        return [
+            ["123", 'intval', p::lit("2"), null],
+            ["123", 'intval', p::lit("1"), r::make("23", [1])],
+        ];
+    }
+    /**
+     * @dataProvider mapProvider
+     */
+    public function testMap(
+        string $input,
+        callable $f,
+        p $parser,
+        ?r $expected
+    ): void {
+        $actual = $parser->map($f)($input);
         $this->assertEquals($expected, $actual);
     }
 

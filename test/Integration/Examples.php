@@ -18,10 +18,18 @@ class Examples extends TestCase
         //we can have as many as we want, but we need at least one
         $allDigits = $anyDigit->with(p::all($anyDigit));
 
-        //convert the digits to actual integers
-        $integer = $allDigits->apply(function (array $digits): array {
-            return [(int) implode('', $digits)];
-        });
+        //convert the digits to actual integers from characters
+        $intArray = $allDigits->map('intval');
+        //reduce the separate digits into one
+        $integer = $intArray->reduce(
+            /**
+             * @param array{0:int} $a
+             */
+            function (array $a, int $i): array {
+                return [$a[0] * 10 + $i];
+            },
+            [0]
+        );
 
         return $integer;
     }
@@ -62,7 +70,7 @@ class Examples extends TestCase
     }
 
     /**
-     * @var string[] $keyValues the keys are in the string between moustaches
+     * @var array<string,string> $keyValues the keys are in the string between moustaches
      */
     public static function interpolateString(
         string $s,
@@ -89,21 +97,13 @@ class Examples extends TestCase
         $interpolate = $open->with($key, $close);
 
         //function to convert some keys to values
-        $keysToValues =
-            /**
-             * @param array<int, string> $keys
-             * @return array<int, string>
-             */
-            function (array $keys) use ($keyValues): array {
-                $v = [];
-                foreach ($keys as $k) {
-                    /** @var string */ $v[] = $keyValues[$k];
-                }
-                return $v;
-            };
+        $keyToValue = function (string $key) use ($keyValues): string {
+            /** @var string */ $value = $keyValues[$key];
+            return $value;
+        };
 
         // convert the inperpolated key tokens to their values
-        $value = $interpolate->apply($keysToValues);
+        $value = $interpolate->map($keyToValue);
 
         //try to interpolate, if we can't just eat a code point and try again
         $munch = p::all($value->or(p::pop()));

@@ -122,16 +122,35 @@ final class Combinator
         });
     }
 
-    /**
-     * @param callable(array):array $f
-     */
-    public function apply(callable $f): self
+    public function map(callable $f): self
     {
-        return new self(function (string $input) use ($f): ?r {
-            $result = $this($input);
-            return null === $result
-                ? null
-                : r::make($result->unparsed, $f($result->parsed));
+        return new self(function (string $in) use ($f): ?r {
+            $r = $this($in);
+            if (null === $r) {
+                return $r;
+            } else {
+                return r::make($r->unparsed, array_map($f, $r->parsed));
+            }
+        });
+    }
+
+    /**
+     * @param callable(array, mixed):array $f
+     */
+    public function reduce(callable $f, array $start = []): self
+    {
+        return new self(function (string $in) use ($f, $start): ?r {
+            $r = $this($in);
+            if (null === $r) {
+                return $r;
+            } else {
+                /** @var array */ $reduced = array_reduce(
+                    $r->parsed,
+                    $f,
+                    $start
+                );
+                return r::make($r->unparsed, $reduced);
+            }
         });
     }
 
