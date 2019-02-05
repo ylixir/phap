@@ -10,6 +10,14 @@
             "email": "ylixir@gmail.com"
         }
     ],
+    "keywords": [
+        "parse",
+        "parser",
+        "parsing",
+        "lex",
+        "lexer",
+        "lexing"
+    ],
     "minimum-stability": "stable",
     "require": {
         "php": "^7.2.0"

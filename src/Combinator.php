@@ -8,7 +8,7 @@ final class Combinator
 {
     //convenience constants for passing functions to functions
     const lit = self::class . "::lit";
-    const many = self::class . "::many";
+    const all = self::class . "::all";
     const pop = self::class . "::pop";
 
     /** @var callable(string):?r */ private $parse;
@@ -23,6 +23,7 @@ final class Combinator
     {
         return ($this->parse)($s);
     }
+
     public static function pop(): self
     {
         return new self(function (string $in): ?r {
@@ -72,11 +73,11 @@ final class Combinator
                 $tail = $tail[0]->or(...array_slice($tail, 1));
         }
         return new self(function (string $input) use ($tail): ?r {
-            return ($this->parse)($input) ?? $tail($input);
+            return $this($input) ?? $tail($input);
         });
     }
 
-    public function and(self ...$tail): self
+    public function with(self ...$tail): self
     {
         switch (count($tail)) {
             case 0:
@@ -85,11 +86,11 @@ final class Combinator
                 $tail = $tail[0];
                 break;
             default:
-                $tail = $tail[0]->and(...array_slice($tail, 1));
+                $tail = $tail[0]->with(...array_slice($tail, 1));
         }
 
         return new self(function (string $input) use ($tail): ?r {
-            $head = ($this->parse)($input);
+            $head = $this($input);
             if (null === $head) {
                 return null;
             }
@@ -106,7 +107,7 @@ final class Combinator
         });
     }
 
-    public static function many(self $parser): self
+    public static function all(self $parser): self
     {
         return new self(function (string $input) use ($parser): r {
             $parsed = [];
@@ -121,38 +122,61 @@ final class Combinator
         });
     }
 
-    public function between(self $left, self $right): self
+    public function map(callable $f): self
     {
-        return new self(function (string $input) use ($left, $right): ?r {
-            $left = $left($input);
-            if (null === $left) {
-                return null;
+        return new self(function (string $in) use ($f): ?r {
+            $r = $this($in);
+            if (null === $r) {
+                return $r;
+            } else {
+                return r::make($r->unparsed, array_map($f, $r->parsed));
             }
-
-            $middle = ($this->parse)($left->unparsed);
-            if (null === $middle) {
-                return null;
-            }
-
-            $right = $right($middle->unparsed);
-            if (null === $right) {
-                return null;
-            }
-
-            return r::make($right->unparsed, $middle->parsed);
         });
     }
 
     /**
-     * @param callable(array):array $f
+     * @param callable(array, mixed):array $f
      */
-    public function apply(callable $f): self
+    public function reduce(callable $f, array $start = []): self
     {
-        return new self(function (string $input) use ($f): ?r {
-            $result = ($this->parse)($input);
-            return null === $result
-                ? null
-                : r::make($result->unparsed, $f($result->parsed));
+        return new self(function (string $in) use ($f, $start): ?r {
+            $r = $this($in);
+            if (null === $r) {
+                return $r;
+            } else {
+                /** @var array */ $reduced = array_reduce(
+                    $r->parsed,
+                    $f,
+                    $start
+                );
+                return r::make($r->unparsed, $reduced);
+            }
+        });
+    }
+
+    public function drop(): self
+    {
+        return new self(function (string $in): ?r {
+            $r = $this($in);
+
+            if (null === $r) {
+                return null;
+            } else {
+                return r::make($r->unparsed, []);
+            }
+        });
+    }
+
+    public function end(): self
+    {
+        return new self(function (string $in): ?r {
+            $r = $this($in);
+
+            if (null === $r || '' !== $r->unparsed) {
+                return null;
+            } else {
+                return $r;
+            }
         });
     }
 }

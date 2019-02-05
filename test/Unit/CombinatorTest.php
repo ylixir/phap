@@ -102,7 +102,7 @@ class CombinatorTest extends TestCase
      */
     public function testAnd(string $input, array $parsers, ?r $expected): void
     {
-        $actual = $parsers[0]->and(...array_slice($parsers, 1))($input);
+        $actual = $parsers[0]->with(...array_slice($parsers, 1))($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -120,54 +120,85 @@ class CombinatorTest extends TestCase
      */
     public function testMany(string $input, p $parser, r $expected): void
     {
-        $actual = p::many($parser)($input);
+        $actual = p::all($parser)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function betweenProvider(): array
+    public function reduceProvider(): array
     {
-        return [
-            ["123", p::lit("2"), p::lit("2"), p::lit("3"), null],
-            ["123", p::lit("1"), p::lit("2"), p::lit("2"), null],
-            ["123", p::lit("1"), p::lit("2"), p::lit("3"), r::make("", ["2"])],
-        ];
-    }
-    /**
-     * @dataProvider betweenProvider
-     */
-    public function testBetween(
-        string $input,
-        p $left,
-        p $middle,
-        p $right,
-        ?r $expected
-    ): void {
-        $actual = $middle->between($left, $right)($input);
-        $this->assertEquals($expected, $actual);
-    }
+        $reduce = function (array $a, string $s): array {
+            if ('2' !== $s) {
+                $a[] = $s;
+            }
 
-    public function applyProvider(): array
-    {
-        $toint = function (array $i): array {
-            return array_map('intval', $i);
+            return $a;
         };
-
         return [
-            ["123", $toint, p::lit("2"), null],
-            ["123", $toint, p::lit("1"), r::make("23", [1])],
-            ["123", $toint, p::lit("1"), r::make("23", ["1"])],
+            ["123", $reduce, p::lit("2"), null],
+            ["123", $reduce, p::all(p::pop()), r::make("", ["1", "3"])],
         ];
     }
     /**
-     * @dataProvider applyProvider
+     * @dataProvider reduceProvider
      */
-    public function testApply(
+    public function testReduce(
         string $input,
         callable $f,
         p $parser,
         ?r $expected
     ): void {
-        $actual = $parser->apply($f)($input);
+        $actual = $parser->reduce($f)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function mapProvider(): array
+    {
+        return [
+            ["123", 'intval', p::lit("2"), null],
+            ["123", 'intval', p::lit("1"), r::make("23", [1])],
+        ];
+    }
+    /**
+     * @dataProvider mapProvider
+     */
+    public function testMap(
+        string $input,
+        callable $f,
+        p $parser,
+        ?r $expected
+    ): void {
+        $actual = $parser->map($f)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function dropProvider(): array
+    {
+        return [
+            ["12", p::pop(), r::make('2', [])],
+            ["12", p::lit("12"), r::make('', [])],
+        ];
+    }
+    /**
+     * @dataProvider dropProvider
+     */
+    public function testdrop(string $input, p $parser, ?r $expected): void
+    {
+        $actual = $parser->drop()($input);
+        $this->assertEquals($expected, $actual);
+    }
+    public function endProvider(): array
+    {
+        return [
+            ["12", p::pop(), null],
+            ["12", p::lit("12"), r::make('', ["12"])],
+        ];
+    }
+    /**
+     * @dataProvider endProvider
+     */
+    public function testEnd(string $input, p $parser, ?r $expected): void
+    {
+        $actual = $parser->end()($input);
         $this->assertEquals($expected, $actual);
     }
 }

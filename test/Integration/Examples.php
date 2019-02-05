@@ -16,12 +16,20 @@ class Examples extends TestCase
         $anyDigit = p::lit("0")->or(...$litDigits);
 
         //we can have as many as we want, but we need at least one
-        $allDigits = $anyDigit->and(p::many($anyDigit));
+        $allDigits = $anyDigit->with(p::all($anyDigit));
 
-        //convert the digits to actual integers
-        $integer = $allDigits->apply(function (array $digits): array {
-            return [(int) implode('', $digits)];
-        });
+        //convert the digits to actual integers from characters
+        $intArray = $allDigits->map('intval');
+        //reduce the separate digits into one
+        $integer = $intArray->reduce(
+            /**
+             * @param array{0:int} $a
+             */
+            function (array $a, int $i): array {
+                return [$a[0] * 10 + $i];
+            },
+            [0]
+        );
 
         return $integer;
     }
@@ -47,8 +55,22 @@ class Examples extends TestCase
         static::assertEquals($expected, $parse($in));
     }
 
+    public function parseEndedIntegerProvider(): array
+    {
+        return [["123", r::make("", [123])], ["12a", null]];
+    }
     /**
-     * @var string[] $keyValues the keys are in the string between moustaches
+     * @dataProvider parseEndedIntegerProvider
+     */
+    public function testParseEndedInteger(string $in, ?r $expected): void
+    {
+        //we can use end to make sure we don't have extra garbage
+        $parse = self::integerParser()->end();
+        static::assertEquals($expected, $parse($in));
+    }
+
+    /**
+     * @var array<string,string> $keyValues the keys are in the string between moustaches
      */
     public static function interpolateString(
         string $s,
@@ -60,9 +82,11 @@ class Examples extends TestCase
         }
 
         // find the interpolation begin and end tokens
-        $spaces = p::many(p::lit(" "));
-        $open = p::lit("{{")->and($spaces);
-        $close = $spaces->and(p::lit("}}"));
+        $spaces = p::all(p::lit(" "));
+        $open = p::lit("{{")
+            ->with($spaces)
+            ->drop();
+        $close = $spaces->with(p::lit("}}"))->drop();
 
         //parse the interpolation strings: only match keys passed in
         /** @var array<int,p> */
@@ -70,27 +94,19 @@ class Examples extends TestCase
         $key = $keyParsers[0]->or(...array_slice($keyParsers, 1));
 
         //extract the key from between the start and end tokens
-        $interpolate = $key->between($open, $close);
+        $interpolate = $open->with($key, $close);
 
         //function to convert some keys to values
-        $keysToValues =
-            /**
-             * @param array<int, string> $keys
-             * @return array<int, string>
-             */
-            function (array $keys) use ($keyValues): array {
-                $v = [];
-                foreach ($keys as $k) {
-                    /** @var string */ $v[] = $keyValues[$k];
-                }
-                return $v;
-            };
+        $keyToValue = function (string $key) use ($keyValues): string {
+            /** @var string */ $value = $keyValues[$key];
+            return $value;
+        };
 
         // convert the inperpolated key tokens to their values
-        $value = $interpolate->apply($keysToValues);
+        $value = $interpolate->map($keyToValue);
 
         //try to interpolate, if we can't just eat a code point and try again
-        $munch = p::many($value->or(p::pop()));
+        $munch = p::all($value->or(p::pop()));
 
         //parse it by passing the string to $munch
         return implode("", $munch($s)->parsed ?? [$s]);
