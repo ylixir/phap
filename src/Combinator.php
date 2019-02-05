@@ -122,28 +122,6 @@ final class Combinator
         });
     }
 
-    public function between(self $left, self $right): self
-    {
-        return new self(function (string $input) use ($left, $right): ?r {
-            $left = $left($input);
-            if (null === $left) {
-                return null;
-            }
-
-            $middle = $this($left->unparsed);
-            if (null === $middle) {
-                return null;
-            }
-
-            $right = $right($middle->unparsed);
-            if (null === $right) {
-                return null;
-            }
-
-            return r::make($right->unparsed, $middle->parsed);
-        });
-    }
-
     /**
      * @param callable(array):array $f
      */

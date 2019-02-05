@@ -124,28 +124,6 @@ class CombinatorTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function betweenProvider(): array
-    {
-        return [
-            ["123", p::lit("2"), p::lit("2"), p::lit("3"), null],
-            ["123", p::lit("1"), p::lit("2"), p::lit("2"), null],
-            ["123", p::lit("1"), p::lit("2"), p::lit("3"), r::make("", ["2"])],
-        ];
-    }
-    /**
-     * @dataProvider betweenProvider
-     */
-    public function testBetween(
-        string $input,
-        p $left,
-        p $middle,
-        p $right,
-        ?r $expected
-    ): void {
-        $actual = $middle->between($left, $right)($input);
-        $this->assertEquals($expected, $actual);
-    }
-
     public function applyProvider(): array
     {
         $toint = function (array $i): array {
