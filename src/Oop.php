@@ -4,7 +4,7 @@ namespace Phap;
 
 use Phap\Result as r;
 
-final class Combinator
+final class Oop
 {
     //convenience constants for passing functions to functions
     const lit = self::class . "::lit";

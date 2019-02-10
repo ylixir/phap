@@ -5,7 +5,7 @@
     </testsuite>
     <testsuite name="Integration">
       <file>test/Integration/functional_examples.php</file>
-      <file>test/Integration/Examples.php</file>
+      <file>test/Integration/OopExamples.php</file>
     </testsuite>
   </testsuites>
 </phpunit>

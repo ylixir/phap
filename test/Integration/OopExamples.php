@@ -2,11 +2,11 @@
 declare(strict_types=1);
 namespace Test\Integration;
 
-use Phap\Combinator as p;
+use Phap\Oop as p;
 use Phap\Result as r;
 use PHPUnit\Framework\TestCase;
 
-class Examples extends TestCase
+class OopExamples extends TestCase
 {
     public static function integerParser(): p
     {

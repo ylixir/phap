@@ -2,11 +2,11 @@
 declare(strict_types=1);
 namespace Test\Unit;
 
-use Phap\Combinator as p;
+use Phap\Oop as p;
 use Phap\Result as r;
 use PHPUnit\Framework\TestCase;
 
-class CombinatorTest extends TestCase
+class OopTest extends TestCase
 {
     public function popProvider(): array
     {
