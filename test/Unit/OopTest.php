@@ -8,20 +8,53 @@ use PHPUnit\Framework\TestCase;
 
 class OopTest extends TestCase
 {
-    public function popProvider(): array
+    public function allProvider(): array
     {
         return [
-            ["123", r::make("23", ["1"])],
-            ["😄∑♥😄", r::make("∑♥😄", ["😄"])],
-            ["", null],
+            ["123", p::lit("1"), r::make("23", ["1"])],
+            ["123", p::lit("2"), r::make("123", [])],
+            ["1123", p::lit("1"), r::make("23", ["1", "1"])],
+            ["1123", p::lit("2"), r::make("1123", [])],
         ];
     }
     /**
-     * @dataProvider popProvider
+     * @dataProvider allProvider
      */
-    public function testPop(string $input, ?r $expected): void
+    public function testAll(string $input, p $parser, r $expected): void
     {
-        $actual = p::pop()($input);
+        $actual = p::all($parser)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function dropProvider(): array
+    {
+        return [
+            ["12", p::pop(), r::make('2', [])],
+            ["12", p::lit("12"), r::make('', [])],
+        ];
+    }
+    /**
+     * @dataProvider dropProvider
+     */
+    public function testDrop(string $input, p $parser, ?r $expected): void
+    {
+        $actual = $parser->drop()($input);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function endProvider(): array
+    {
+        return [
+            ["12", p::pop(), null],
+            ["12", p::lit("12"), r::make('', ["12"])],
+        ];
+    }
+    /**
+     * @dataProvider endProvider
+     */
+    public function testEnd(string $input, p $parser, ?r $expected): void
+    {
+        $actual = $parser->end()($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -42,13 +75,32 @@ class OopTest extends TestCase
             ],
         ];
     }
-
     /**
      * @dataProvider litProvider
      */
     public function testLit(string $input, string $char, ?r $expected): void
     {
         $actual = p::lit($char)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function mapProvider(): array
+    {
+        return [
+            ["123", 'intval', p::lit("2"), null],
+            ["123", 'intval', p::lit("1"), r::make("23", [1])],
+        ];
+    }
+    /**
+     * @dataProvider mapProvider
+     */
+    public function testMap(
+        string $input,
+        callable $f,
+        p $parser,
+        ?r $expected
+    ): void {
+        $actual = $parser->map($f)($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -79,48 +131,20 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function andProvider(): array
+    public function popProvider(): array
     {
         return [
-            ["123", [p::lit("1")], r::make("23", ["1"])],
-            ["123", [p::lit("2")], null],
-            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
-            [
-                "123",
-                [p::lit("1"), p::lit("2"), p::lit("3")],
-                r::make("", ["1", "2", "3"]),
-            ],
-            ["123", [p::lit("2"), p::lit("1")], null],
-            ["123", [p::lit("2"), p::lit("3")], null],
-            ["", [p::lit("2")], null],
-            ["", [p::lit("2"), p::lit("3")], null],
+            ["123", r::make("23", ["1"])],
+            ["😄∑♥😄", r::make("∑♥😄", ["😄"])],
+            ["", null],
         ];
     }
     /**
-     * @dataProvider andProvider
-     * @param array<int, p> $parsers
+     * @dataProvider popProvider
      */
-    public function testAnd(string $input, array $parsers, ?r $expected): void
+    public function testPop(string $input, ?r $expected): void
     {
-        $actual = $parsers[0]->with(...array_slice($parsers, 1))($input);
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function manyProvider(): array
-    {
-        return [
-            ["123", p::lit("1"), r::make("23", ["1"])],
-            ["123", p::lit("2"), r::make("123", [])],
-            ["1123", p::lit("1"), r::make("23", ["1", "1"])],
-            ["1123", p::lit("2"), r::make("1123", [])],
-        ];
-    }
-    /**
-     * @dataProvider manyProvider
-     */
-    public function testMany(string $input, p $parser, r $expected): void
-    {
-        $actual = p::all($parser)($input);
+        $actual = p::pop()($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -151,54 +175,30 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function mapProvider(): array
+    public function withProvider(): array
     {
         return [
-            ["123", 'intval', p::lit("2"), null],
-            ["123", 'intval', p::lit("1"), r::make("23", [1])],
+            ["123", [p::lit("1")], r::make("23", ["1"])],
+            ["123", [p::lit("2")], null],
+            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
+            [
+                "123",
+                [p::lit("1"), p::lit("2"), p::lit("3")],
+                r::make("", ["1", "2", "3"]),
+            ],
+            ["123", [p::lit("2"), p::lit("1")], null],
+            ["123", [p::lit("2"), p::lit("3")], null],
+            ["", [p::lit("2")], null],
+            ["", [p::lit("2"), p::lit("3")], null],
         ];
     }
     /**
-     * @dataProvider mapProvider
+     * @dataProvider withProvider
+     * @param array<int, p> $parsers
      */
-    public function testMap(
-        string $input,
-        callable $f,
-        p $parser,
-        ?r $expected
-    ): void {
-        $actual = $parser->map($f)($input);
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function dropProvider(): array
+    public function testWith(string $input, array $parsers, ?r $expected): void
     {
-        return [
-            ["12", p::pop(), r::make('2', [])],
-            ["12", p::lit("12"), r::make('', [])],
-        ];
-    }
-    /**
-     * @dataProvider dropProvider
-     */
-    public function testdrop(string $input, p $parser, ?r $expected): void
-    {
-        $actual = $parser->drop()($input);
-        $this->assertEquals($expected, $actual);
-    }
-    public function endProvider(): array
-    {
-        return [
-            ["12", p::pop(), null],
-            ["12", p::lit("12"), r::make('', ["12"])],
-        ];
-    }
-    /**
-     * @dataProvider endProvider
-     */
-    public function testEnd(string $input, p $parser, ?r $expected): void
-    {
-        $actual = $parser->end()($input);
+        $actual = $parsers[0]->with(...array_slice($parsers, 1))($input);
         $this->assertEquals($expected, $actual);
     }
 }
