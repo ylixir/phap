@@ -2,39 +2,41 @@
 declare(strict_types=1);
 namespace Test\Integration;
 
-use Phap\Combinator as p;
+use Phap\Functions as p;
 use Phap\Result as r;
 use PHPUnit\Framework\TestCase;
 
-class Examples extends TestCase
+class functional_examples extends TestCase
 {
-    public static function integerParser(): p
+    public static function integer_parser(): callable
     {
         //any digit will do
-        /** @var array<int,p> */
-        $litDigits = array_map(p::lit, range("1", "9"));
-        $anyDigit = p::lit("0")->or(...$litDigits);
+        /** @var array<int,callable(string):?r> */
+        $litDigits = array_map(p::lit, range("0", "9"));
+        $anyDigit = p::or(...$litDigits);
 
         //we can have as many as we want, but we need at least one
-        $allDigits = $anyDigit->with(p::all($anyDigit));
+        $allDigits = p::with($anyDigit, p::all($anyDigit));
 
         //convert the digits to actual integers from characters
-        $intArray = $allDigits->map('intval');
+        $intArray = p::map('intval', $allDigits);
+
         //reduce the separate digits into one
-        $integer = $intArray->reduce(
+        $integer = p::reduce(
             /**
              * @param array{0:int} $a
              */
             function (array $a, int $i): array {
                 return [$a[0] * 10 + $i];
             },
-            [0]
+            [0],
+            $intArray
         );
 
         return $integer;
     }
 
-    public function parseIntegerProvider(): array
+    public function parse_integer_provider(): array
     {
         return [
             ["abc", null],
@@ -47,32 +49,32 @@ class Examples extends TestCase
         ];
     }
     /**
-     * @dataProvider parseIntegerProvider
+     * @dataProvider parse_integer_provider
      */
-    public function testParseInteger(string $in, ?r $expected): void
+    public function test_parse_integer(string $in, ?r $expected): void
     {
-        $parse = self::integerParser();
+        $parse = self::integer_parser();
         static::assertEquals($expected, $parse($in));
     }
 
-    public function parseEndedIntegerProvider(): array
+    public function parse_ended_integer_provider(): array
     {
         return [["123", r::make("", [123])], ["12a", null]];
     }
     /**
-     * @dataProvider parseEndedIntegerProvider
+     * @dataProvider parse_ended_integer_provider
      */
-    public function testParseEndedInteger(string $in, ?r $expected): void
+    public function test_parse_ended_integer(string $in, ?r $expected): void
     {
         //we can use end to make sure we don't have extra garbage
-        $parse = self::integerParser()->end();
+        $parse = p::end(self::integer_parser());
         static::assertEquals($expected, $parse($in));
     }
 
     /**
      * @var array<string,string> $keyValues the keys are in the string between moustaches
      */
-    public static function interpolateString(
+    public static function interpolate_string(
         string $s,
         array $keyValues
     ): string {
@@ -83,18 +85,16 @@ class Examples extends TestCase
 
         // find the interpolation begin and end tokens
         $spaces = p::all(p::lit(" "));
-        $open = p::lit("{{")
-            ->with($spaces)
-            ->drop();
-        $close = $spaces->with(p::lit("}}"))->drop();
+        $open = p::drop(p::with(p::lit("{{"), $spaces));
+        $close = p::drop(p::with($spaces, p::lit("}}")));
 
         //parse the interpolation strings: only match keys passed in
-        /** @var array<int,p> */
+        /** @var array<int,callable(string):?r> */
         $keyParsers = array_map(p::lit, array_keys($keyValues));
-        $key = $keyParsers[0]->or(...array_slice($keyParsers, 1));
+        $key = p::or(...$keyParsers);
 
         //extract the key from between the start and end tokens
-        $interpolate = $open->with($key, $close);
+        $interpolate = p::with($open, $key, $close);
 
         //function to convert some keys to values
         $keyToValue = function (string $key) use ($keyValues): string {
@@ -103,16 +103,16 @@ class Examples extends TestCase
         };
 
         // convert the inperpolated key tokens to their values
-        $value = $interpolate->map($keyToValue);
+        $value = p::map($keyToValue, $interpolate);
 
         //try to interpolate, if we can't just eat a code point and try again
-        $munch = p::all($value->or(p::pop()));
+        $munch = p::all(p::or($value, p::pop()));
 
         //parse it by passing the string to $munch
         return implode("", $munch($s)->parsed ?? [$s]);
     }
 
-    public function interpolationProvider(): array
+    public function interpolation_provider(): array
     {
         return [
             ["abc", [], "abc"],
@@ -144,14 +144,14 @@ class Examples extends TestCase
         ];
     }
     /**
-     * @dataProvider interpolationProvider
+     * @dataProvider interpolation_provider
      */
-    public function testInterpolation(
+    public function test_interpolation(
         string $s,
         array $kv,
         string $expected
     ): void {
-        $actual = self::interpolateString($s, $kv);
+        $actual = self::interpolate_string($s, $kv);
         static::assertSame($expected, $actual);
     }
 }

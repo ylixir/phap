@@ -41,20 +41,30 @@ function setup-nix {
 
 #execute a shell with debugging enabled
 function debug {
-    nix run -f nix/default.nix "${@}"
+    if [ $# -eq 0 ]
+    then
+        nix run -f nix/default.nix
+    else
+        nix run -f nix/default.nix -c "${@}"
+    fi
 }
 
 #execute a shell with debugging disabled
 function run {
-    nix run -f nix/fast.nix "${@}"
+    if [ $# -eq 0 ]
+    then
+        nix run -f nix/fast.nix
+    else
+        nix run -f nix/fast.nix -c "${@}"
+    fi
 }
 
 function grep {
-    run -c grep "${@}"
+    run grep "${@}"
 }
 
 function sed {
-    run -c sed "${@}"
+    run sed "${@}"
 }
 
 
@@ -66,8 +76,8 @@ function sed {
 function init {
     setup-nix
     source "$nixProfile"
-    run -c composer install -n --prefer-dist
-    run -c yarn install
+    run composer install -n --prefer-dist
+    run yarn install
 }
 
 function version {
@@ -90,11 +100,11 @@ function tag {
 
 prettierFiles='**/*.{json,md,php,yml,yaml}'
 function format-verify {
-    run -c yarn --silent prettier --list-different "$prettierFiles"
+    run yarn --silent prettier --list-different "$prettierFiles"
 }
 
 function format {
-    run -c yarn --silent prettier --write "$prettierFiles"
+    run yarn --silent prettier --write "$prettierFiles"
 }
 
 function strict-types {
@@ -111,14 +121,16 @@ function strict-types {
 }
 
 function lint {
-    run -c ./vendor/bin/psalm --threads=4 "${@}"
+    run ./vendor/bin/psalm --threads=4 "${@}"
 }
 
 function test-debug {
-    debug -c ./vendor/bin/phpunit "${@}"
+    debug ./vendor/bin/phpunit "${@}"
 }
 function test {
-    run -c ./vendor/bin/phpunit "${@}"
+    local project=$(pwd)/
+    set -o pipefail
+    run ./vendor/bin/phpunit "${@}" | sed "s:$project::g"
 }
 
 function check {
