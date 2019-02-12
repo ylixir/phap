@@ -16,7 +16,7 @@ class OopExamples extends TestCase
         $anyDigit = p::lit("0")->or(...$litDigits);
 
         //we can have as many as we want, but we need at least one
-        $allDigits = $anyDigit->with(p::all($anyDigit));
+        $allDigits = $anyDigit->and($anyDigit->repeat());
 
         //convert the digits to actual integers from characters
         $intArray = $allDigits->map('intval');
@@ -82,11 +82,11 @@ class OopExamples extends TestCase
         }
 
         // find the interpolation begin and end tokens
-        $spaces = p::all(p::lit(" "));
+        $spaces = p::lit(" ")->repeat();
         $open = p::lit("{{")
-            ->with($spaces)
+            ->and($spaces)
             ->drop();
-        $close = $spaces->with(p::lit("}}"))->drop();
+        $close = $spaces->and(p::lit("}}"))->drop();
 
         //parse the interpolation strings: only match keys passed in
         /** @var array<int,p> */
@@ -94,7 +94,7 @@ class OopExamples extends TestCase
         $key = $keyParsers[0]->or(...array_slice($keyParsers, 1));
 
         //extract the key from between the start and end tokens
-        $interpolate = $open->with($key, $close);
+        $interpolate = $open->and($key, $close);
 
         //function to convert some keys to values
         $keyToValue = function (string $key) use ($keyValues): string {
@@ -106,7 +106,7 @@ class OopExamples extends TestCase
         $value = $interpolate->map($keyToValue);
 
         //try to interpolate, if we can't just eat a code point and try again
-        $munch = p::all($value->or(p::pop()));
+        $munch = $value->or(p::pop())->repeat();
 
         //parse it by passing the string to $munch
         return implode("", $munch($s)->parsed ?? [$s]);

@@ -7,7 +7,7 @@ use Phap\Result as r;
 final class Functions
 {
     //convenience constants for passing functions to functions
-    const all = self::class . "::all";
+    const and = self::class . "::and";
     const drop = self::class . "::drop";
     const end = self::class . "::end";
     const lit = self::class . "::lit";
@@ -15,24 +15,40 @@ final class Functions
     const or = self::class . "::or";
     const pop = self::class . "::pop";
     const reduce = self::class . "::reduce";
-    const with = self::class . "::with";
+    const repeat = self::class . "::repeat";
 
     /**
-     * @param callable(string):?r $p
+     * @param callable(string):?r $head
+     * @param array<int,callable(string):?r> $tail
      * @return callable(string):?r
      */
-    public static function all(callable $p): callable
+    public static function and(callable $head, callable ...$tail): callable
     {
-        return function (string $input) use ($p): r {
-            $parsed = [];
-            $result = $p($input);
-            while (null !== $result) {
-                $input = $result->unparsed;
-                $parsed = array_merge($parsed, $result->parsed);
-                $result = $p($input);
+        switch (count($tail)) {
+            case 0:
+                return $head;
+            case 1:
+                $tail = $tail[0];
+                break;
+            default:
+                $tail = self::and(...$tail);
+        }
+
+        return function (string $input) use ($head, $tail): ?r {
+            $head = $head($input);
+            if (null === $head) {
+                return null;
             }
 
-            return r::make($input, $parsed);
+            $tail = $tail($head->unparsed);
+            if (null === $tail) {
+                return null;
+            }
+
+            return r::make(
+                $tail->unparsed,
+                array_merge($head->parsed, $tail->parsed)
+            );
         };
     }
 
@@ -176,37 +192,21 @@ final class Functions
     }
 
     /**
-     * @param callable(string):?r $head
-     * @param array<int,callable(string):?r> $tail
+     * @param callable(string):?r $p
      * @return callable(string):?r
      */
-    public static function with(callable $head, callable ...$tail): callable
+    public static function repeat(callable $p): callable
     {
-        switch (count($tail)) {
-            case 0:
-                return $head;
-            case 1:
-                $tail = $tail[0];
-                break;
-            default:
-                $tail = self::with(...$tail);
-        }
-
-        return function (string $input) use ($head, $tail): ?r {
-            $head = $head($input);
-            if (null === $head) {
-                return null;
+        return function (string $input) use ($p): r {
+            $parsed = [];
+            $result = $p($input);
+            while (null !== $result) {
+                $input = $result->unparsed;
+                $parsed = array_merge($parsed, $result->parsed);
+                $result = $p($input);
             }
 
-            $tail = $tail($head->unparsed);
-            if (null === $tail) {
-                return null;
-            }
-
-            return r::make(
-                $tail->unparsed,
-                array_merge($head->parsed, $tail->parsed)
-            );
+            return r::make($input, $parsed);
         };
     }
 }

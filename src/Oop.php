@@ -8,7 +8,6 @@ use Phap\Result as r;
 final class Oop
 {
     //convenience constants for passing functions to functions
-    const all = self::class . "::all";
     const lit = self::class . "::lit";
     const pop = self::class . "::pop";
 
@@ -26,9 +25,19 @@ final class Oop
         return ($this->parser)($s);
     }
 
-    public static function all(self $p): self
+    public function and(self ...$tail): self
     {
-        return new self(p::all($p->parser));
+        switch (count($tail)) {
+            case 0:
+                return $this;
+            case 1:
+                $tail = $tail[0];
+                break;
+            default:
+                $tail = $tail[0]->and(...array_slice($tail, 1));
+        }
+
+        return new self(p::and($this->parser, $tail->parser));
     }
 
     public function drop(): self
@@ -78,18 +87,8 @@ final class Oop
         return new self(p::reduce($f, $start, $this->parser));
     }
 
-    public function with(self ...$tail): self
+    public function repeat(): self
     {
-        switch (count($tail)) {
-            case 0:
-                return $this;
-            case 1:
-                $tail = $tail[0];
-                break;
-            default:
-                $tail = $tail[0]->with(...array_slice($tail, 1));
-        }
-
-        return new self(p::with($this->parser, $tail->parser));
+        return new self(p::repeat($this->parser));
     }
 }

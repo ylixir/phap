@@ -8,21 +8,30 @@ use PHPUnit\Framework\TestCase;
 
 class FunctionsTest extends TestCase
 {
-    public function all_provider(): array
+    public function and_provider(): array
     {
         return [
-            ["123", p::lit("1"), r::make("23", ["1"])],
-            ["123", p::lit("2"), r::make("123", [])],
-            ["1123", p::lit("1"), r::make("23", ["1", "1"])],
-            ["1123", p::lit("2"), r::make("1123", [])],
+            ["123", [p::lit("1")], r::make("23", ["1"])],
+            ["123", [p::lit("2")], null],
+            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
+            [
+                "123",
+                [p::lit("1"), p::lit("2"), p::lit("3")],
+                r::make("", ["1", "2", "3"]),
+            ],
+            ["123", [p::lit("2"), p::lit("1")], null],
+            ["123", [p::lit("2"), p::lit("3")], null],
+            ["", [p::lit("2")], null],
+            ["", [p::lit("2"), p::lit("3")], null],
         ];
     }
     /**
-     * @dataProvider all_provider
+     * @dataProvider and_provider
+     * @param array<int, callable(string):?r> $parsers
      */
-    public function test_all(string $input, callable $parser, r $expected): void
+    public function test_and(string $input, array $parsers, ?r $expected): void
     {
-        $actual = p::all($parser)($input);
+        $actual = p::and(...$parsers)($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -166,7 +175,7 @@ class FunctionsTest extends TestCase
         };
         return [
             ["123", $reduce, p::lit("2"), null],
-            ["123", $reduce, p::all(p::pop()), r::make("", ["1", "3"])],
+            ["123", $reduce, p::repeat(p::pop()), r::make("", ["1", "3"])],
         ];
     }
     /**
@@ -182,30 +191,24 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function with_provider(): array
+    public function repeat_provider(): array
     {
         return [
-            ["123", [p::lit("1")], r::make("23", ["1"])],
-            ["123", [p::lit("2")], null],
-            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
-            [
-                "123",
-                [p::lit("1"), p::lit("2"), p::lit("3")],
-                r::make("", ["1", "2", "3"]),
-            ],
-            ["123", [p::lit("2"), p::lit("1")], null],
-            ["123", [p::lit("2"), p::lit("3")], null],
-            ["", [p::lit("2")], null],
-            ["", [p::lit("2"), p::lit("3")], null],
+            ["123", p::lit("1"), r::make("23", ["1"])],
+            ["123", p::lit("2"), r::make("123", [])],
+            ["1123", p::lit("1"), r::make("23", ["1", "1"])],
+            ["1123", p::lit("2"), r::make("1123", [])],
         ];
     }
     /**
-     * @dataProvider with_provider
-     * @param array<int, callable(string):?r> $parsers
+     * @dataProvider repeat_provider
      */
-    public function test_with(string $input, array $parsers, ?r $expected): void
-    {
-        $actual = p::with(...$parsers)($input);
+    public function test_repeat(
+        string $input,
+        callable $parser,
+        r $expected
+    ): void {
+        $actual = p::repeat($parser)($input);
         $this->assertEquals($expected, $actual);
     }
 }
