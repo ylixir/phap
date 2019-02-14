@@ -73,6 +73,33 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function fold_provider(): array
+    {
+        $fold = function (array $a, string $s): array {
+            if ('2' !== $s) {
+                $a[] = $s;
+            }
+
+            return $a;
+        };
+        return [
+            ["123", $fold, p::lit("2"), null],
+            ["123", $fold, p::repeat(p::pop()), r::make("", ["1", "3"])],
+        ];
+    }
+    /**
+     * @dataProvider fold_provider
+     */
+    public function test_fold(
+        string $input,
+        callable $f,
+        callable $parser,
+        ?r $expected
+    ): void {
+        $actual = p::fold($f, [], $parser)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
     public function lit_provider(): array
     {
         return [
@@ -161,33 +188,6 @@ class FunctionsTest extends TestCase
     public function test_pop(string $input, ?r $expected): void
     {
         $actual = p::pop()($input);
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function reduce_provider(): array
-    {
-        $reduce = function (array $a, string $s): array {
-            if ('2' !== $s) {
-                $a[] = $s;
-            }
-
-            return $a;
-        };
-        return [
-            ["123", $reduce, p::lit("2"), null],
-            ["123", $reduce, p::repeat(p::pop()), r::make("", ["1", "3"])],
-        ];
-    }
-    /**
-     * @dataProvider reduce_provider
-     */
-    public function test_reduce(
-        string $input,
-        callable $f,
-        callable $parser,
-        ?r $expected
-    ): void {
-        $actual = p::reduce($f, [], $parser)($input);
         $this->assertEquals($expected, $actual);
     }
 

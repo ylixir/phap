@@ -22,7 +22,7 @@ class functional_examples extends TestCase
         $intArray = p::map('intval', $allDigits);
 
         //reduce the separate digits into one
-        $integer = p::reduce(
+        $integer = p::fold(
             /**
              * @param array{0:int} $a
              */

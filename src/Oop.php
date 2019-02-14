@@ -50,6 +50,14 @@ final class Oop
         return new self(p::end($this->parser));
     }
 
+    /**
+     * @param callable(array, mixed):array $f
+     */
+    public function fold(callable $f, array $start = []): self
+    {
+        return new self(p::fold($f, $start, $this->parser));
+    }
+
     public static function lit(string $c): self
     {
         return new self(p::lit($c));
@@ -77,14 +85,6 @@ final class Oop
     public static function pop(): self
     {
         return new self(p::pop());
-    }
-
-    /**
-     * @param callable(array, mixed):array $f
-     */
-    public function reduce(callable $f, array $start = []): self
-    {
-        return new self(p::reduce($f, $start, $this->parser));
     }
 
     public function repeat(): self

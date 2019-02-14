@@ -21,7 +21,7 @@ class OopExamples extends TestCase
         //convert the digits to actual integers from characters
         $intArray = $allDigits->map('intval');
         //reduce the separate digits into one
-        $integer = $intArray->reduce(
+        $integer = $intArray->fold(
             /**
              * @param array{0:int} $a
              */

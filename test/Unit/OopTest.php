@@ -157,9 +157,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function reduceProvider(): array
+    public function foldProvider(): array
     {
-        $reduce = function (array $a, string $s): array {
+        $fold = function (array $a, string $s): array {
             if ('2' !== $s) {
                 $a[] = $s;
             }
@@ -167,20 +167,20 @@ class OopTest extends TestCase
             return $a;
         };
         return [
-            ["123", $reduce, p::lit("2"), null],
-            ["123", $reduce, p::pop()->repeat(), r::make("", ["1", "3"])],
+            ["123", $fold, p::lit("2"), null],
+            ["123", $fold, p::pop()->repeat(), r::make("", ["1", "3"])],
         ];
     }
     /**
-     * @dataProvider reduceProvider
+     * @dataProvider foldProvider
      */
-    public function testReduce(
+    public function testFold(
         string $input,
         callable $f,
         p $parser,
         ?r $expected
     ): void {
-        $actual = $parser->reduce($f)($input);
+        $actual = $parser->fold($f)($input);
         $this->assertEquals($expected, $actual);
     }
 

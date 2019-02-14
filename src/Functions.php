@@ -14,7 +14,7 @@ final class Functions
     const map = self::class . "::map";
     const or = self::class . "::or";
     const pop = self::class . "::pop";
-    const reduce = self::class . "::reduce";
+    const fold = self::class . "::fold";
     const repeat = self::class . "::repeat";
 
     /**
@@ -82,6 +82,31 @@ final class Functions
                 return null;
             } else {
                 return $r;
+            }
+        };
+    }
+
+    /**
+     * @param callable(array, mixed):array $f
+     * @param callable(string):?r $p
+     * @return callable(string):?r
+     */
+    public static function fold(
+        callable $f,
+        array $start,
+        callable $p
+    ): callable {
+        return function (string $in) use ($f, $p, $start): ?r {
+            $r = $p($in);
+            if (null === $r) {
+                return $r;
+            } else {
+                /** @var array */ $reduced = array_reduce(
+                    $r->parsed,
+                    $f,
+                    $start
+                );
+                return r::make($r->unparsed, $reduced);
             }
         };
     }
@@ -162,31 +187,6 @@ final class Functions
                 $head = [mb_substr($in, 0, 1)];
                 $tail = mb_substr($in, 1);
                 return r::make($tail, $head);
-            }
-        };
-    }
-
-    /**
-     * @param callable(array, mixed):array $f
-     * @param callable(string):?r $p
-     * @return callable(string):?r
-     */
-    public static function reduce(
-        callable $f,
-        array $start,
-        callable $p
-    ): callable {
-        return function (string $in) use ($f, $p, $start): ?r {
-            $r = $p($in);
-            if (null === $r) {
-                return $r;
-            } else {
-                /** @var array */ $reduced = array_reduce(
-                    $r->parsed,
-                    $f,
-                    $start
-                );
-                return r::make($r->unparsed, $reduced);
             }
         };
     }
