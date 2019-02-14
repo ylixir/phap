@@ -8,21 +8,30 @@ use PHPUnit\Framework\TestCase;
 
 class OopTest extends TestCase
 {
-    public function allProvider(): array
+    public function andProvider(): array
     {
         return [
-            ["123", p::lit("1"), r::make("23", ["1"])],
-            ["123", p::lit("2"), r::make("123", [])],
-            ["1123", p::lit("1"), r::make("23", ["1", "1"])],
-            ["1123", p::lit("2"), r::make("1123", [])],
+            ["123", [p::lit("1")], r::make("23", ["1"])],
+            ["123", [p::lit("2")], null],
+            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
+            [
+                "123",
+                [p::lit("1"), p::lit("2"), p::lit("3")],
+                r::make("", ["1", "2", "3"]),
+            ],
+            ["123", [p::lit("2"), p::lit("1")], null],
+            ["123", [p::lit("2"), p::lit("3")], null],
+            ["", [p::lit("2")], null],
+            ["", [p::lit("2"), p::lit("3")], null],
         ];
     }
     /**
-     * @dataProvider allProvider
+     * @dataProvider andProvider
+     * @param array<int, p> $parsers
      */
-    public function testAll(string $input, p $parser, r $expected): void
+    public function testAnd(string $input, array $parsers, ?r $expected): void
     {
-        $actual = p::all($parser)($input);
+        $actual = $parsers[0]->and(...array_slice($parsers, 1))($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -148,9 +157,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function reduceProvider(): array
+    public function foldProvider(): array
     {
-        $reduce = function (array $a, string $s): array {
+        $fold = function (array $a, string $s): array {
             if ('2' !== $s) {
                 $a[] = $s;
             }
@@ -158,47 +167,38 @@ class OopTest extends TestCase
             return $a;
         };
         return [
-            ["123", $reduce, p::lit("2"), null],
-            ["123", $reduce, p::all(p::pop()), r::make("", ["1", "3"])],
+            ["123", $fold, p::lit("2"), null],
+            ["123", $fold, p::pop()->repeat(), r::make("", ["1", "3"])],
         ];
     }
     /**
-     * @dataProvider reduceProvider
+     * @dataProvider foldProvider
      */
-    public function testReduce(
+    public function testFold(
         string $input,
         callable $f,
         p $parser,
         ?r $expected
     ): void {
-        $actual = $parser->reduce($f)($input);
+        $actual = $parser->fold($f)($input);
         $this->assertEquals($expected, $actual);
     }
 
-    public function withProvider(): array
+    public function repeatProvider(): array
     {
         return [
-            ["123", [p::lit("1")], r::make("23", ["1"])],
-            ["123", [p::lit("2")], null],
-            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
-            [
-                "123",
-                [p::lit("1"), p::lit("2"), p::lit("3")],
-                r::make("", ["1", "2", "3"]),
-            ],
-            ["123", [p::lit("2"), p::lit("1")], null],
-            ["123", [p::lit("2"), p::lit("3")], null],
-            ["", [p::lit("2")], null],
-            ["", [p::lit("2"), p::lit("3")], null],
+            ["123", p::lit("1"), r::make("23", ["1"])],
+            ["123", p::lit("2"), r::make("123", [])],
+            ["1123", p::lit("1"), r::make("23", ["1", "1"])],
+            ["1123", p::lit("2"), r::make("1123", [])],
         ];
     }
     /**
-     * @dataProvider withProvider
-     * @param array<int, p> $parsers
+     * @dataProvider repeatProvider
      */
-    public function testWith(string $input, array $parsers, ?r $expected): void
+    public function testRepeat(string $input, p $parser, r $expected): void
     {
-        $actual = $parsers[0]->with(...array_slice($parsers, 1))($input);
+        $actual = $parser->repeat()($input);
         $this->assertEquals($expected, $actual);
     }
 }

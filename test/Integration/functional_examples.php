@@ -16,13 +16,13 @@ class functional_examples extends TestCase
         $anyDigit = p::or(...$litDigits);
 
         //we can have as many as we want, but we need at least one
-        $allDigits = p::with($anyDigit, p::all($anyDigit));
+        $allDigits = p::and($anyDigit, p::repeat($anyDigit));
 
         //convert the digits to actual integers from characters
         $intArray = p::map('intval', $allDigits);
 
         //reduce the separate digits into one
-        $integer = p::reduce(
+        $integer = p::fold(
             /**
              * @param array{0:int} $a
              */
@@ -84,9 +84,9 @@ class functional_examples extends TestCase
         }
 
         // find the interpolation begin and end tokens
-        $spaces = p::all(p::lit(" "));
-        $open = p::drop(p::with(p::lit("{{"), $spaces));
-        $close = p::drop(p::with($spaces, p::lit("}}")));
+        $spaces = p::repeat(p::lit(" "));
+        $open = p::drop(p::and(p::lit("{{"), $spaces));
+        $close = p::drop(p::and($spaces, p::lit("}}")));
 
         //parse the interpolation strings: only match keys passed in
         /** @var array<int,callable(string):?r> */
@@ -94,7 +94,7 @@ class functional_examples extends TestCase
         $key = p::or(...$keyParsers);
 
         //extract the key from between the start and end tokens
-        $interpolate = p::with($open, $key, $close);
+        $interpolate = p::and($open, $key, $close);
 
         //function to convert some keys to values
         $keyToValue = function (string $key) use ($keyValues): string {
@@ -106,7 +106,7 @@ class functional_examples extends TestCase
         $value = p::map($keyToValue, $interpolate);
 
         //try to interpolate, if we can't just eat a code point and try again
-        $munch = p::all(p::or($value, p::pop()));
+        $munch = p::repeat(p::or($value, p::pop()));
 
         //parse it by passing the string to $munch
         return implode("", $munch($s)->parsed ?? [$s]);
