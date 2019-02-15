@@ -12,6 +12,15 @@ Currently I am still exploring the best API for these needs. Expect breaking cha
 
 In the meantime, you can get an idea of where we stand by perusing the waffle board linked above.
 
+# Reference
+
+You may read the [documentation for the API here](docs/api.md).
+
+Example code can be found here:
+
+-   [object oriented](test/integration/OopExamples.php)
+-   [functional](test/integration/functional_examples.php)
+
 # Contributions
 
 Any and all help is greatly appreciated. Feel free to open pull requests, issues, start a conversation on an issue, etc.
