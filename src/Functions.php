@@ -10,11 +10,11 @@ final class Functions
     const and = self::class . "::and";
     const drop = self::class . "::drop";
     const end = self::class . "::end";
+    const fold = self::class . "::fold";
     const lit = self::class . "::lit";
     const map = self::class . "::map";
     const or = self::class . "::or";
     const pop = self::class . "::pop";
-    const fold = self::class . "::fold";
     const repeat = self::class . "::repeat";
 
     /**
