@@ -73,6 +73,39 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function float_provider(): array
+    {
+        return [
+            ["10.", r::make("", [10.0])],
+            ["1.0", r::make("", [1.0])],
+            [".1", r::make("", [0.1])],
+
+            ["10E1", r::make("", [100.0])],
+            ["10e-1", r::make("", [1.0])],
+            ["10e+1", r::make("", [100.0])],
+
+            ["10.e1", r::make("", [100.0])],
+            ["1.0E-1", r::make("", [0.1])],
+            [".1E+1", r::make("", [1.0])],
+
+            ["1e0", r::make("", [1.0])],
+
+            ["1.a", r::make("a", [1.0])],
+
+            ["123", null],
+            ["", null],
+        ];
+    }
+    /**
+     * @dataProvider float_provider
+     */
+    public function test_float(string $input, ?r $expected): void
+    {
+        $p = p::float();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function fold_provider(): array
     {
         $fold = function (string $s, ...$a): array {

@@ -24,6 +24,35 @@ If the parse fails then you get back a `null`.
 
 If the parse succeeds, then you get back a `Phap\Result`. This result object has two read only properties: `parsed` and `unparsed`. The former is an array, the latter is a string.
 
+## `float`
+
+This parses a series of decimal digits, periods, and the letter `e`, returning a `float`.
+
+#### OOP and FP
+
+```php
+$parser = p::float();
+
+assert([10.0] === $parser("10.")->parsed);
+assert([1.0] === $parser("1.0")->parsed);
+assert([0.1] === $parser(".1")->parsed);
+
+assert([100.0] === $parser("10E1")->parsed);
+assert([1.0] === $parser("10e-1")->parsed);
+assert([100.0] === $parser("10e+1")->parsed);
+
+assert([100.0] === $parser("10.e1")->parsed);
+assert([0.1] === $parser("1.0E-1")->parsed);
+assert([1.0] === $parser(".1E+1")->parsed);
+
+assert([1.0] === $parser("1e0")->parsed);
+
+assert('a' === $parser("1.a")->unparsed);
+
+assert(null === $parser("123"));
+assert(null === $parser(""));
+```
+
 ## `int`
 
 This parses a sequence of decimal digits converting them to an `int`.

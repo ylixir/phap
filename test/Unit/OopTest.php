@@ -67,6 +67,38 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function floatProvider(): array
+    {
+        return [
+            ["10.", r::make("", [10.0])],
+            ["1.0", r::make("", [1.0])],
+            [".1", r::make("", [0.1])],
+
+            ["10E1", r::make("", [100.0])],
+            ["10e-1", r::make("", [1.0])],
+            ["10e+1", r::make("", [100.0])],
+
+            ["10.e1", r::make("", [100.0])],
+            ["1.0E-1", r::make("", [0.1])],
+            [".1E+1", r::make("", [1.0])],
+
+            ["1e0", r::make("", [1.0])],
+
+            ["1.a", r::make("a", [1.0])],
+
+            ["123", null],
+            ["", null],
+        ];
+    }
+    /**
+     * @dataProvider floatProvider
+     */
+    public function testFloat(string $input, ?r $expected): void
+    {
+        $p = p::float();
+
+        self::assertEquals($expected, $p($input));
+    }
     public function foldProvider(): array
     {
         $fold = function (string $s, ...$a): array {
@@ -94,7 +126,7 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function int_provider(): array
+    public function intProvider(): array
     {
         return [
             ["123", r::make("", [123])],
@@ -105,9 +137,9 @@ class OopTest extends TestCase
         ];
     }
     /**
-     * @dataProvider int_provider
+     * @dataProvider intProvider
      */
-    public function test_int(string $input, ?r $expected): void
+    public function testInt(string $input, ?r $expected): void
     {
         $p = p::int();
 

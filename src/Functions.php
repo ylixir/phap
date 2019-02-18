@@ -88,6 +88,53 @@ final class Functions
     }
 
     /**
+     * @return callable(string):?r<float>
+     */
+    public static function float(): callable
+    {
+        $decimal_part = self::map(function (int $q): float {
+            for ($d = 1; $d <= $q; $d *= 10);
+            return $q / $d;
+        }, self::int());
+        $integer_part = self::map('floatval', self::int());
+
+        // parse a non-scientific float into integer and decimal parts
+        $parts = self::or(
+            self::and($integer_part, self::drop(self::lit(".")), $decimal_part),
+            self::and($integer_part, self::drop(self::lit("."))),
+            self::and(self::drop(self::lit(".")), $decimal_part)
+        );
+        $float = self::fold(
+            /** @return array{0:float} */ function (float $p, float $i): array {
+                return [$i + $p];
+            },
+            [0.0],
+            $parts
+        );
+
+        $e = self::drop(self::or(self::lit("e"), self::lit("E")));
+        $negative_integer = self::map(function (int $i): int {
+            return -$i;
+        }, self::and(self::drop(self::lit("-")), self::int()));
+        $positive_integer = self::and(self::drop(self::lit("+")), self::int());
+        $mantissa = self::map(function (int $i): float {
+            return pow(10, $i);
+        }, self::and(
+            $e,
+            self::or(self::int(), $negative_integer, $positive_integer)
+        ));
+        $scientific = self::fold(
+            /** @return array{0:float} */ function (float $a, float $b): array {
+                return [$a * $b];
+            },
+            [1],
+            self::and(self::or($float, $integer_part), $mantissa)
+        );
+
+        return self::or($scientific, $float);
+    }
+
+    /**
      * @template S
      * @template T
      * @param callable(T, S...):array<int,S> $f
