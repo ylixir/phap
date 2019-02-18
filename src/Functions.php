@@ -11,6 +11,7 @@ final class Functions
     const drop = self::class . "::drop";
     const end = self::class . "::end";
     const fold = self::class . "::fold";
+    const int = self::class . "::int";
     const lit = self::class . "::lit";
     const map = self::class . "::map";
     const or = self::class . "::or";
@@ -120,6 +121,26 @@ final class Functions
                 return r::make($r->unparsed, $reduced);
             }
         };
+    }
+
+    /**
+     * @return callable(string):?r<int>
+     */
+    public static function int(): callable
+    {
+        /**
+         * @var array<int, callable(string):?r<string>>
+         */
+        $digitLits = array_map(self::lit, range("0", "9"));
+        $digits = self::or(...$digitLits);
+
+        $intString = self::and($digits, self::repeat($digits));
+
+        $intVal = function (string $d, int $a): array {
+            return [$a * 10 + (int) $d];
+        };
+
+        return self::fold($intVal, [0], $intString);
     }
 
     /**

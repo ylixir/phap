@@ -8,6 +8,7 @@ use Phap\Result as r;
 final class Oop
 {
     //convenience constants for passing functions to functions
+    const int = self::class . "::int";
     const lit = self::class . "::lit";
     const pop = self::class . "::pop";
 
@@ -48,6 +49,11 @@ final class Oop
     public function end(): self
     {
         return new self(p::end($this->parser));
+    }
+
+    public static function int(): self
+    {
+        return new self(p::int());
     }
 
     /**

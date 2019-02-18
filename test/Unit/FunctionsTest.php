@@ -100,6 +100,26 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function int_provider(): array
+    {
+        return [
+            ["123", r::make("", [123])],
+            ["0", r::make("", [0])],
+            ["123a", r::make("a", [123])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider int_provider
+     */
+    public function test_int(string $input, ?r $expected): void
+    {
+        $p = p::int();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function lit_provider(): array
     {
         return [
