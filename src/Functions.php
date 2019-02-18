@@ -87,7 +87,9 @@ final class Functions
     }
 
     /**
-     * @param callable(array, mixed):array $f
+     * @template S
+     * @template T
+     * @param callable(T, S...):array<int,S> $f
      * @param callable(string):?r $p
      * @return callable(string):?r
      */
@@ -101,9 +103,18 @@ final class Functions
             if (null === $r) {
                 return $r;
             } else {
-                /** @var array */ $reduced = array_reduce(
+                $ftransform =
+                    /**
+                     * @param S[] $a
+                     * @param T $s
+                     * @return array<int, S>
+                     */
+                    function (array $a, $s) use ($f): array {
+                        return $f($s, ...$a);
+                    };
+                /** @var array<int, S> */ $reduced = array_reduce(
                     $r->parsed,
-                    $f,
+                    $ftransform,
                     $start
                 );
                 return r::make($r->unparsed, $reduced);
@@ -149,7 +160,8 @@ final class Functions
             if (null === $r) {
                 return $r;
             } else {
-                return r::make($r->unparsed, array_map($f, $r->parsed));
+                /** @var array<int, T> */ $mapped = array_map($f, $r->parsed);
+                return r::make($r->unparsed, $mapped);
             }
         };
     }

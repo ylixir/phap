@@ -75,7 +75,7 @@ class FunctionsTest extends TestCase
 
     public function fold_provider(): array
     {
-        $fold = function (array $a, string $s): array {
+        $fold = function (string $s, ...$a): array {
             if ('2' !== $s) {
                 $a[] = $s;
             }

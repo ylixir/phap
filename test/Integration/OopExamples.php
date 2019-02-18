@@ -22,11 +22,8 @@ class OopExamples extends TestCase
         $intArray = $allDigits->map('intval');
         //reduce the separate digits into one
         $integer = $intArray->fold(
-            /**
-             * @param array{0:int} $a
-             */
-            function (array $a, int $i): array {
-                return [$a[0] * 10 + $i];
+            function (int $i, int $a, int ...$tail): array {
+                return [$a * 10 + $i];
             },
             [0]
         );

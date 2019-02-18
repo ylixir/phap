@@ -104,7 +104,7 @@ Similar to `array_reduce`, this function can be used to combine values. For exam
 $flower = p::lit("flower");
 $flowers = $flower->and($flower);
 
-$parser = $flowers->fold(function (array $acc, string $in): array {
+$parser = $flowers->fold(function (string $in, string ...$acc): array {
     return ["flowers"];
 }, []);
 
@@ -118,7 +118,7 @@ $flower = p::lit("flower");
 $flowers = p::and($flower, $flower);
 
 $parser = p::fold(
-    function (array $acc, string $in): array {
+    function (string $in, string ...$acc): array {
         return ["flowers"];
     },
     [],

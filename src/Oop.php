@@ -51,7 +51,10 @@ final class Oop
     }
 
     /**
-     * @param callable(array, mixed):array $f
+     * @template T
+     * @template S
+     * @param callable(T, S...):S[] $f
+     * @param array<int, S> $start
      */
     public function fold(callable $f, array $start = []): self
     {
