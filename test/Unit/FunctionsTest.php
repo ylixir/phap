@@ -221,6 +221,26 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function octal_provider(): array
+    {
+        return [
+            ["123", r::make("", [0123])],
+            ["0", r::make("", [0])],
+            ["123a", r::make("a", [0123])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider octal_provider
+     */
+    public function test_octal(string $input, ?r $expected): void
+    {
+        $p = p::octal();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function or_provider(): array
     {
         return [

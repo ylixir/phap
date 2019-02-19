@@ -12,6 +12,7 @@ final class Oop
     const hex = self::class . "::hex";
     const int = self::class . "::int";
     const lit = self::class . "::lit";
+    const octal = self::class . "::octal";
     const pop = self::class . "::pop";
 
     /** @var callable(string):?r */
@@ -87,6 +88,11 @@ final class Oop
     public function map(callable $f): self
     {
         return new self(p::map($f, $this->parser));
+    }
+
+    public static function octal(): self
+    {
+        return new self(p::octal());
     }
 
     public function or(self ...$tail): self

@@ -94,3 +94,24 @@ assert(null === $parser("")->parsed);
 //doesn't handle signs
 assert(null === $parser("-123")->parsed);
 ```
+
+## `octal`
+
+This parses a sequence of octal digits converting them to an `int`.
+
+#### OOP and FP
+
+```php
+$parser = p::octal();
+
+assert([0123] === $parser("123")->parsed);
+assert([0] === $parser("0")->parsed);
+
+//doesn't include an end condition
+assert('a' === $parser("123a")->unparsed);
+
+//doesn't handle signs
+assert(null === $parser("-123")->parsed);
+
+assert(null === $parser("")->parsed);
+```

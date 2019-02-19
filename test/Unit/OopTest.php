@@ -213,6 +213,26 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function octalProvider(): array
+    {
+        return [
+            ["123", r::make("", [0123])],
+            ["0", r::make("", [0])],
+            ["123a", r::make("a", [0123])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider octalProvider
+     */
+    public function testOctal(string $input, ?r $expected): void
+    {
+        $p = p::octal();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function orProvider(): array
     {
         return [

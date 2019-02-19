@@ -16,6 +16,7 @@ final class Functions
     const int = self::class . "::int";
     const lit = self::class . "::lit";
     const map = self::class . "::map";
+    const octal = self::class . "::octal";
     const or = self::class . "::or";
     const pop = self::class . "::pop";
     const repeat = self::class . "::repeat";
@@ -267,6 +268,26 @@ final class Functions
                 return r::make($r->unparsed, $mapped);
             }
         };
+    }
+
+    /**
+     * @return callable(string):?r<int>
+     */
+    public static function octal(): callable
+    {
+        /**
+         * @var array<int, callable(string):?r<string>>
+         */
+        $digitLits = array_map(self::lit, range("0", "7"));
+        $digits = self::or(...$digitLits);
+
+        $intString = self::and($digits, self::repeat($digits));
+
+        $intVal = function (string $d, int $a): array {
+            return [$a * 010 + (int) $d];
+        };
+
+        return self::fold($intVal, [0], $intString);
     }
 
     /**
