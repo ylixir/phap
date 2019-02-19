@@ -67,6 +67,33 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function foldProvider(): array
+    {
+        $fold = function (string $s, ...$a): array {
+            if ('2' !== $s) {
+                $a[] = $s;
+            }
+
+            return $a;
+        };
+        return [
+            ["123", $fold, p::lit("2"), null],
+            ["123", $fold, p::pop()->repeat(), r::make("", ["1", "3"])],
+        ];
+    }
+    /**
+     * @dataProvider foldProvider
+     */
+    public function testFold(
+        string $input,
+        callable $f,
+        p $parser,
+        ?r $expected
+    ): void {
+        $actual = $parser->fold($f)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
     public function int_provider(): array
     {
         return [
@@ -174,33 +201,6 @@ class OopTest extends TestCase
     public function testPop(string $input, ?r $expected): void
     {
         $actual = p::pop()($input);
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function foldProvider(): array
-    {
-        $fold = function (string $s, ...$a): array {
-            if ('2' !== $s) {
-                $a[] = $s;
-            }
-
-            return $a;
-        };
-        return [
-            ["123", $fold, p::lit("2"), null],
-            ["123", $fold, p::pop()->repeat(), r::make("", ["1", "3"])],
-        ];
-    }
-    /**
-     * @dataProvider foldProvider
-     */
-    public function testFold(
-        string $input,
-        callable $f,
-        p $parser,
-        ?r $expected
-    ): void {
-        $actual = $parser->fold($f)($input);
         $this->assertEquals($expected, $actual);
     }
 

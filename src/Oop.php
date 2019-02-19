@@ -51,11 +51,6 @@ final class Oop
         return new self(p::end($this->parser));
     }
 
-    public static function int(): self
-    {
-        return new self(p::int());
-    }
-
     /**
      * @template T
      * @template S
@@ -65,6 +60,11 @@ final class Oop
     public function fold(callable $f, array $start = []): self
     {
         return new self(p::fold($f, $start, $this->parser));
+    }
+
+    public static function int(): self
+    {
+        return new self(p::int());
     }
 
     public static function lit(string $c): self
