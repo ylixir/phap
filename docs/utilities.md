@@ -78,14 +78,14 @@ assert([1.0] === $parser("1.0")->parsed);
 assert([0.1] === $parser(".1")->parsed);
 
 assert([100.0] === $parser("10E1")->parsed);
-assert([1.0] === $parser("10e-1")->parsed);
+assert([1.0] === $parser("10e-001")->parsed);
 assert([100.0] === $parser("10e+1")->parsed);
 
-assert([100.0] === $parser("10.e1")->parsed);
-assert([0.1] === $parser("1.0E-1")->parsed);
-assert([1.0] === $parser(".1E+1")->parsed);
+assert([100.0] === $parser("10.e001")->parsed);
+assert([0.1] === $parser("1.00E-1")->parsed);
+assert([1.0] === $parser(".1E+001")->parsed);
 
-assert([1.0] === $parser("1e0")->parsed);
+assert([1.0] === $parser("1e00")->parsed);
 
 assert('a' === $parser("1.a")->unparsed);
 
@@ -133,6 +133,8 @@ assert('a' === $parser("123a")->unparsed);
 assert(null === $parser("")->parsed);
 //doesn't handle signs
 assert(null === $parser("-123")->parsed);
+//doesn't allow accidental octal collisions
+assert(null === $parser("00")->parsed);
 ```
 
 ## `octal`

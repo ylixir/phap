@@ -29,6 +29,7 @@ final class Result
 
     /**
      * @param array<int, T> $parsed
+     * @return self<T>
      */
     public static function make(string $unparsed, array $parsed): self
     {

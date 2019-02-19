@@ -126,17 +126,27 @@ final class Functions
      */
     public static function float(): callable
     {
-        $decimal_part = self::map(function (int $q): float {
+        //mantissa and fractional integer's may have leading zeros
+        $zeros_integer = self::or(
+            self::and(self::drop(self::repeat(self::lit("0"))), self::int()),
+            self::and(self::int(), self::drop(self::repeat(self::lit("0"))))
+        );
+
+        $fractional_part = self::map(function (int $q): float {
             for ($d = 1; $d <= $q; $d *= 10);
             return $q / $d;
-        }, self::int());
+        }, $zeros_integer);
         $integer_part = self::map('floatval', self::int());
 
         // parse a non-scientific float into integer and decimal parts
         $parts = self::or(
-            self::and($integer_part, self::drop(self::lit(".")), $decimal_part),
+            self::and(
+                $integer_part,
+                self::drop(self::lit(".")),
+                $fractional_part
+            ),
             self::and($integer_part, self::drop(self::lit("."))),
-            self::and(self::drop(self::lit(".")), $decimal_part)
+            self::and(self::drop(self::lit(".")), $fractional_part)
         );
         $float = self::fold(
             /** @return array{0:float} */ function (float $p, float $i): array {
@@ -147,15 +157,19 @@ final class Functions
         );
 
         $e = self::drop(self::or(self::lit("e"), self::lit("E")));
+
         $negative_integer = self::map(function (int $i): int {
             return -$i;
-        }, self::and(self::drop(self::lit("-")), self::int()));
-        $positive_integer = self::and(self::drop(self::lit("+")), self::int());
+        }, self::and(self::drop(self::lit("-")), $zeros_integer));
+        $positive_integer = self::and(
+            self::drop(self::lit("+")),
+            $zeros_integer
+        );
         $mantissa = self::map(function (int $i): float {
             return pow(10, $i);
         }, self::and(
             $e,
-            self::or(self::int(), $negative_integer, $positive_integer)
+            self::or($zeros_integer, $negative_integer, $positive_integer)
         ));
         $scientific = self::fold(
             /** @return array{0:float} */ function (float $a, float $b): array {
@@ -194,7 +208,7 @@ final class Functions
                     function (array $a, $s) use ($f): array {
                         return $f($s, ...$a);
                     };
-                /** @var array<int, S> */ $reduced = array_reduce(
+                /** @var array<int, mixed> */ $reduced = array_reduce(
                     $r->parsed,
                     $ftransform,
                     $start
@@ -245,10 +259,15 @@ final class Functions
         /**
          * @var array<int, callable(string):?r<string>>
          */
-        $digitLits = array_map(self::lit, range("0", "9"));
-        $digits = self::or(...$digitLits);
+        $firstLits = array_map(self::lit, range("1", "9"));
+        $zeroLit = self::lit("0");
+        $firstDigits = self::or(...$firstLits);
+        $digits = self::or($zeroLit, ...$firstLits);
 
-        $intString = self::and($digits, self::repeat($digits));
+        $intString = self::or(
+            self::and($firstDigits, self::repeat($digits)),
+            $zeroLit
+        );
 
         $intVal = function (string $d, int $a): array {
             return [$a * 10 + (int) $d];
@@ -258,7 +277,7 @@ final class Functions
     }
 
     /**
-     * @return callable(string):?r
+     * @return callable(string):?r<string>
      */
     public static function lit(string $c): callable
     {
@@ -274,7 +293,9 @@ final class Functions
             $tail = mb_strcut($in, $cLen);
 
             if ($head === $c) {
-                return r::make($tail, [$head]);
+                /** @var r<string> */
+                $result = r::make($tail, [$head]);
+                return $result;
             } else {
                 return null;
             }
@@ -285,20 +306,26 @@ final class Functions
      * @template S
      * @template T
      * @param callable(S):T $f
-     * @param callable(string):?r $p
-     * @return callable(string):?r
+     * @param callable(string):?r<S> $p
+     * @return callable(string):?r<T>
      */
     public static function map(callable $f, callable $p): callable
     {
-        return function (string $in) use ($f, $p): ?r {
-            $r = $p($in);
-            if (null === $r) {
-                return $r;
-            } else {
-                /** @var array<int, T> */ $mapped = array_map($f, $r->parsed);
-                return r::make($r->unparsed, $mapped);
-            }
-        };
+        return /**
+             * @return ?r<T>
+             */
+            function (string $in) use ($f, $p): ?r {
+                $r = $p($in);
+                if (null === $r) {
+                    return $r;
+                } else {
+                    /** @var array<int, mixed> */ $mapped = array_map(
+                        $f,
+                        $r->parsed
+                    );
+                    return r::make($r->unparsed, $mapped);
+                }
+            };
     }
 
     /**
@@ -323,7 +350,7 @@ final class Functions
 
     /**
      * @param callable(string):?r $head
-     * @param array<int,callable(string):?r> $tail
+     * @param callable(string):?r ...$tail
      * @return callable(string):?r
      */
     public static function or(callable $head, callable ...$tail): callable
