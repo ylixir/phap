@@ -23,6 +23,7 @@ final class Functions
     const pop = self::class . "::pop";
     const repeat = self::class . "::repeat";
     const spaces = self::class . "::spaces";
+    const whitespace = self::class . "::whitespace";
 
     /**
      * @param callable(string):?r $head
@@ -384,5 +385,14 @@ final class Functions
         $space = self::or(self::lit(" "), self::lit("\t"));
 
         return self::and($space, self::repeat($space));
+    }
+
+    /**
+     * @return callable(string):?r<string>
+     */
+    public static function whitespace(): callable
+    {
+        $ws = self::or(self::spaces(), self::eol());
+        return self::and($ws, self::repeat($ws));
     }
 }

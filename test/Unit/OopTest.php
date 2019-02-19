@@ -348,4 +348,18 @@ class OopTest extends TestCase
 
         self::assertEquals($expected, $p($input));
     }
+
+    public function whitespaceProvider(): array
+    {
+        return [[" \t\r\n", r::make("", [" ", "\t", "\r\n"])], ["", null]];
+    }
+    /**
+     * @dataProvider whitespaceProvider
+     */
+    public function testWhitespace(string $input, ?r $expected): void
+    {
+        $p = p::whitespace();
+
+        self::assertEquals($expected, $p($input));
+    }
 }

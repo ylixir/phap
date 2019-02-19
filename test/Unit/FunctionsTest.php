@@ -359,4 +359,18 @@ class FunctionsTest extends TestCase
 
         self::assertEquals($expected, $p($input));
     }
+
+    public function whitespace_provider(): array
+    {
+        return [[" \t\r\n", r::make("", [" ", "\t", "\r\n"])], ["", null]];
+    }
+    /**
+     * @dataProvider whitespace_provider
+     */
+    public function test_whitespace(string $input, ?r $expected): void
+    {
+        $p = p::whitespace();
+
+        self::assertEquals($expected, $p($input));
+    }
 }

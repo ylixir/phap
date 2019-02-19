@@ -169,3 +169,17 @@ assert([" ", "\t"] === $parser(" \t")->parsed);
 
 assert(null === $parser("")->parsed);
 ```
+
+## `whitespace`
+
+This parses a sequence of spaces, tabs and newlines.
+
+#### OOP and FP
+
+```php
+$parser = p::whitespace();
+
+assert([" ", "\t", "\r\n"] === $parser(" \t\r\n")->parsed);
+
+assert(null === $parser("")->parsed);
+```

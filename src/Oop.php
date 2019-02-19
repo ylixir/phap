@@ -17,6 +17,7 @@ final class Oop
     const octal = self::class . "::octal";
     const pop = self::class . "::pop";
     const spaces = self::class . "::spaces";
+    const whitespace = self::class . "::whitespace";
 
     /** @var callable(string):?r */
     private $parser;
@@ -135,5 +136,10 @@ final class Oop
     public static function spaces(): self
     {
         return new self(p::spaces());
+    }
+
+    public static function whitespace(): self
+    {
+        return new self(p::whitespace());
     }
 }
