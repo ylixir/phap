@@ -9,6 +9,7 @@ final class Oop
 {
     //convenience constants for passing functions to functions
     const binary = self::class . "::binary";
+    const eol = self::class . "::eol";
     const float = self::class . "::float";
     const hex = self::class . "::hex";
     const int = self::class . "::int";
@@ -59,6 +60,11 @@ final class Oop
     public function end(): self
     {
         return new self(p::end($this->parser));
+    }
+
+    public static function eol(): self
+    {
+        return new self(p::eol());
     }
 
     public static function float(): self

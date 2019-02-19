@@ -11,6 +11,7 @@ final class Functions
     const binary = self::class . "::binary";
     const drop = self::class . "::drop";
     const end = self::class . "::end";
+    const eol = self::class . "::eol";
     const float = self::class . "::float";
     const fold = self::class . "::fold";
     const hex = self::class . "::hex";
@@ -109,6 +110,14 @@ final class Functions
                 return $r;
             }
         };
+    }
+
+    /**
+     * @return callable(string):?r<string>
+     */
+    public static function eol(): callable
+    {
+        return self::or(self::lit("\n"), self::lit("\r\n"), self::lit("\r"));
     }
 
     /**

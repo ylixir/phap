@@ -44,6 +44,26 @@ assert(null === $parser("")->parsed);
 assert(null === $parser("-100")->parsed);
 ```
 
+## `eol`
+
+This parses an end of line. This might be dos, unix, or mac encoding.
+
+#### OOP and FP
+
+```php
+$parser = p::eol();
+
+assert(["\n"] === $parser("\n")->parsed);
+assert(["\r\n"] === $parser("\r\n")->parsed);
+assert(["\r"] === $parser("\r")->parsed);
+
+//only parses one at a time. doesn't munch like spaces
+assert(["\n"] === $parser("\n\r")->parsed);
+assert("\r" === $parser("\n\r")->unparsed);
+
+assert(null === $parser("")->parsed);
+```
+
 ## `float`
 
 This parses a series of decimal digits, periods, and the letter `e`, returning a `float`.

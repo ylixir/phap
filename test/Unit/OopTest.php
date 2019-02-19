@@ -87,6 +87,26 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function eolProvider(): array
+    {
+        return [
+            ["\n", r::make("", ["\n"])],
+            ["\r\n", r::make("", ["\r\n"])],
+            ["\r", r::make("", ["\r"])],
+            ["\n\r", r::make("\r", ["\n"])],
+            ["", null],
+        ];
+    }
+    /**
+     * @dataProvider eolProvider
+     */
+    public function testEol(string $input, ?r $expected): void
+    {
+        $p = p::eol();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function floatProvider(): array
     {
         return [

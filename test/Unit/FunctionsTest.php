@@ -93,6 +93,26 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function eol_provider(): array
+    {
+        return [
+            ["\n", r::make("", ["\n"])],
+            ["\r\n", r::make("", ["\r\n"])],
+            ["\r", r::make("", ["\r"])],
+            ["\n\r", r::make("\r", ["\n"])],
+            ["", null],
+        ];
+    }
+    /**
+     * @dataProvider eol_provider
+     */
+    public function test_eol(string $input, ?r $expected): void
+    {
+        $p = p::eol();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function float_provider(): array
     {
         return [
