@@ -35,6 +35,26 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function binaryProvider(): array
+    {
+        return [
+            ["1", r::make("", [0b1])],
+            ["0", r::make("", [0])],
+            ["101a", r::make("a", [0b101])],
+            ["", null],
+            ["-1", null],
+        ];
+    }
+    /**
+     * @dataProvider binaryProvider
+     */
+    public function testBinary(string $input, ?r $expected): void
+    {
+        $p = p::binary();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function dropProvider(): array
     {
         return [
@@ -293,5 +313,19 @@ class OopTest extends TestCase
     {
         $actual = $parser->repeat()($input);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function spacesProvider(): array
+    {
+        return [[" \t", r::make("", [" ", "\t"])], ["", null]];
+    }
+    /**
+     * @dataProvider spacesProvider
+     */
+    public function testSpaces(string $input, ?r $expected): void
+    {
+        $p = p::spaces();
+
+        self::assertEquals($expected, $p($input));
     }
 }

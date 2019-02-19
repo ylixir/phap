@@ -8,6 +8,7 @@ final class Functions
 {
     //convenience constants for passing functions to functions
     const and = self::class . "::and";
+    const binary = self::class . "::binary";
     const drop = self::class . "::drop";
     const end = self::class . "::end";
     const float = self::class . "::float";
@@ -20,6 +21,7 @@ final class Functions
     const or = self::class . "::or";
     const pop = self::class . "::pop";
     const repeat = self::class . "::repeat";
+    const spaces = self::class . "::spaces";
 
     /**
      * @param callable(string):?r $head
@@ -54,6 +56,25 @@ final class Functions
                 array_merge($head->parsed, $tail->parsed)
             );
         };
+    }
+
+    /**
+     * @return callable(string):?r<int>
+     */
+    public static function binary(): callable
+    {
+        /**
+         * @var array<int, callable(string):?r<string>>
+         */
+        $digits = self::or(self::lit("0"), self::lit("1"));
+
+        $intString = self::and($digits, self::repeat($digits));
+
+        $intVal = function (string $d, int $a): array {
+            return [($a << 1) | (int) $d];
+        };
+
+        return self::fold($intVal, [0], $intString);
     }
 
     /**
@@ -344,5 +365,15 @@ final class Functions
 
             return r::make($input, $parsed);
         };
+    }
+
+    /**
+     * @return callable(string):?r<string>
+     */
+    public static function spaces(): callable
+    {
+        $space = self::or(self::lit(" "), self::lit("\t"));
+
+        return self::and($space, self::repeat($space));
     }
 }

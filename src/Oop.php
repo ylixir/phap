@@ -8,12 +8,14 @@ use Phap\Result as r;
 final class Oop
 {
     //convenience constants for passing functions to functions
+    const binary = self::class . "::binary";
     const float = self::class . "::float";
     const hex = self::class . "::hex";
     const int = self::class . "::int";
     const lit = self::class . "::lit";
     const octal = self::class . "::octal";
     const pop = self::class . "::pop";
+    const spaces = self::class . "::spaces";
 
     /** @var callable(string):?r */
     private $parser;
@@ -42,6 +44,11 @@ final class Oop
         }
 
         return new self(p::and($this->parser, $tail->parser));
+    }
+
+    public static function binary(): self
+    {
+        return new self(p::binary());
     }
 
     public function drop(): self
@@ -117,5 +124,10 @@ final class Oop
     public function repeat(): self
     {
         return new self(p::repeat($this->parser));
+    }
+
+    public static function spaces(): self
+    {
+        return new self(p::spaces());
     }
 }

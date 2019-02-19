@@ -24,6 +24,26 @@ If the parse fails then you get back a `null`.
 
 If the parse succeeds, then you get back a `Phap\Result`. This result object has two read only properties: `parsed` and `unparsed`. The former is an array, the latter is a string.
 
+## `binary`
+
+This parses a sequence of binary digits converting them to an `int`.
+
+#### OOP and FP
+
+```php
+$parser = p::binary();
+
+assert([0b100] === $parser("100")->parsed);
+assert([0] === $parser("0")->parsed);
+
+//doesn't include an end condition
+assert('a' === $parser("101a")->unparsed);
+
+assert(null === $parser("")->parsed);
+//doesn't handle signs
+assert(null === $parser("-100")->parsed);
+```
+
 ## `float`
 
 This parses a series of decimal digits, periods, and the letter `e`, returning a `float`.
@@ -112,6 +132,20 @@ assert('a' === $parser("123a")->unparsed);
 
 //doesn't handle signs
 assert(null === $parser("-123")->parsed);
+
+assert(null === $parser("")->parsed);
+```
+
+## `spaces`
+
+This parses a sequence of spaces and tabs.
+
+#### OOP and FP
+
+```php
+$parser = p::spaces();
+
+assert([" ", "\t"] === $parser(" \t")->parsed);
 
 assert(null === $parser("")->parsed);
 ```
