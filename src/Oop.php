@@ -9,6 +9,7 @@ final class Oop
 {
     //convenience constants for passing functions to functions
     const float = self::class . "::float";
+    const hex = self::class . "::hex";
     const int = self::class . "::int";
     const lit = self::class . "::lit";
     const pop = self::class . "::pop";
@@ -66,6 +67,11 @@ final class Oop
     public function fold(callable $f, array $start = []): self
     {
         return new self(p::fold($f, $start, $this->parser));
+    }
+
+    public static function hex(): self
+    {
+        return new self(p::hex());
     }
 
     public static function int(): self

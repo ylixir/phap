@@ -53,6 +53,28 @@ assert(null === $parser("123"));
 assert(null === $parser(""));
 ```
 
+## `hex`
+
+This parses a sequence of hexadecimal digits converting them to an `int`.
+
+#### OOP and FP
+
+```php
+$parser = p::hex();
+
+assert([0x1a] === $parser("1a")->parsed);
+assert([0xf] === $parser("F")->parsed);
+assert([0] === $parser("0")->parsed);
+
+//doesn't include an end condition or prefixes
+assert([0] === $parser("0xa")->parsed);
+assert("xa" === $parser("0xa")->unparsed);
+
+assert(null === $parser("")->parsed);
+//doesn't handle signs
+assert(null === $parser("-123")->parsed);
+```
+
 ## `int`
 
 This parses a sequence of decimal digits converting them to an `int`.

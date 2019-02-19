@@ -10,7 +10,9 @@ final class Functions
     const and = self::class . "::and";
     const drop = self::class . "::drop";
     const end = self::class . "::end";
+    const float = self::class . "::float";
     const fold = self::class . "::fold";
+    const hex = self::class . "::hex";
     const int = self::class . "::int";
     const lit = self::class . "::lit";
     const map = self::class . "::map";
@@ -168,6 +170,39 @@ final class Functions
                 return r::make($r->unparsed, $reduced);
             }
         };
+    }
+
+    /**
+     * @return callable(string):?r<int>
+     */
+    public static function hex(): callable
+    {
+        /**
+         * @var array<int, callable(string):?r<string>>
+         */
+        $decLits = array_map(self::lit, range("0", "9"));
+        /**
+         * @var array<int, callable(string):?r<string>>
+         */
+        $hexLits = array_merge(
+            array_map(self::lit, range("a", "f")),
+            array_map(self::lit, range("A", "F"))
+        );
+
+        $dec = self::map('intval', self::or(...$decLits));
+        $hex = self::map(function (string $v): int {
+            return 9 + (0xf & ord($v));
+        }, self::or(...$hexLits));
+
+        $digits = self::or($dec, $hex);
+
+        $hexSequence = self::and($digits, self::repeat($digits));
+
+        $hexVal = function (int $d, int $a): array {
+            return [$a * 0x10 + $d];
+        };
+
+        return self::fold($hexVal, [0], $hexSequence);
     }
 
     /**

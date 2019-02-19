@@ -126,6 +126,27 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function hexProvider(): array
+    {
+        return [
+            ["1a", r::make("", [0x1a])],
+            ["F", r::make("", [0xf])],
+            ["0", r::make("", [0])],
+            ["0xa", r::make("xa", [0])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider hexProvider
+     */
+    public function testHex(string $input, ?r $expected): void
+    {
+        $p = p::hex();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function intProvider(): array
     {
         return [

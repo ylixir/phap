@@ -133,6 +133,27 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function hex_provider(): array
+    {
+        return [
+            ["1a", r::make("", [0x1a])],
+            ["F", r::make("", [0xf])],
+            ["0", r::make("", [0])],
+            ["0xa", r::make("xa", [0])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider hex_provider
+     */
+    public function test_hex(string $input, ?r $expected): void
+    {
+        $p = p::hex();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function int_provider(): array
     {
         return [
