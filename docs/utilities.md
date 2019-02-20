@@ -44,6 +44,38 @@ assert(null === $parser("")->parsed);
 assert(null === $parser("-100")->parsed);
 ```
 
+## `block`
+
+This is a block text parser. You'll want to use this for things like string and comment parsing.
+
+```php
+$quote = p::lit('"');
+$escquote = p::lit('""');
+$parser = p::block($quote, $quote, $escquote);
+assert(['"', '1', '""', '2', '"'] === $parser('"1""2"')->parsed);
+
+$cstart = p::lit("/*");
+$cend = p::lit("*/");
+$parser = p::block($cstart, $cend, p::fail());
+assert(["/*", "/", "*", "a", "*/"] === $parser("/*/*a*/")->parsed);
+```
+
+#### OOP and FP
+
+```php
+$parser = p::binary();
+
+assert([0b100] === $parser("100")->parsed);
+assert([0] === $parser("0")->parsed);
+
+//doesn't include an end condition
+assert('a' === $parser("101a")->unparsed);
+
+assert(null === $parser("")->parsed);
+//doesn't handle signs
+assert(null === $parser("-100")->parsed);
+```
+
 ## `eol`
 
 This parses an end of line. This might be dos, unix, or mac encoding.

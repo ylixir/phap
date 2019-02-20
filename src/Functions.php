@@ -82,6 +82,23 @@ final class Functions
     }
 
     /**
+     * @template T
+     * @param callable(string):?r<T> $start
+     * @param callable(string):?r<T> $end
+     * @param callable(string):?r<T> $escape
+     * @return callable(string):?r<T>
+     */
+    public static function block(
+        callable $start,
+        callable $end,
+        callable $escape
+    ): callable {
+        $muncher = self::and(self::not($end), self::pop());
+        $middle = self::or($escape, $muncher);
+        return self::and($start, self::repeat($middle), $end);
+    }
+
+    /**
      * @param callable(string):?r $p
      * @return callable(string):?r
      */

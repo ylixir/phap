@@ -35,6 +35,40 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function block_provider(): array
+    {
+        return [
+            [
+                p::lit('"'),
+                p::lit('"'),
+                p::lit('""'),
+                '"1""2"',
+                r::make("", ['"', '1', '""', '2', '"']),
+            ],
+            [
+                p::lit('/*'),
+                p::lit('*/'),
+                p::fail(),
+                "/*/*a*/",
+                r::make("", ["/*", "/", "*", "a", "*/"]),
+            ],
+        ];
+    }
+    /**
+     * @dataProvider block_provider
+     */
+    public function test_block(
+        callable $start,
+        callable $end,
+        callable $escape,
+        string $in,
+        ?r $expected
+    ): void {
+        $p = p::block($start, $end, $escape);
+
+        self::assertEquals($expected, $p($in));
+    }
+
     public function binary_provider(): array
     {
         return [

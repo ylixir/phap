@@ -55,6 +55,40 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    public function blockProvider(): array
+    {
+        return [
+            [
+                p::lit('"'),
+                p::lit('"'),
+                p::lit('""'),
+                '"1""2"',
+                r::make("", ['"', '1', '""', '2', '"']),
+            ],
+            [
+                p::lit('/*'),
+                p::lit('*/'),
+                p::fail(),
+                "/*/*a*/",
+                r::make("", ["/*", "/", "*", "a", "*/"]),
+            ],
+        ];
+    }
+    /**
+     * @dataProvider blockProvider
+     */
+    public function testBlock(
+        callable $start,
+        callable $end,
+        callable $escape,
+        string $in,
+        ?r $expected
+    ): void {
+        $p = p::block($start, $end, $escape);
+
+        self::assertEquals($expected, $p($in));
+    }
+
     public function dropProvider(): array
     {
         return [

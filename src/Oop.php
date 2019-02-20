@@ -9,6 +9,7 @@ final class Oop
 {
     //convenience constants for passing functions to functions
     const binary = self::class . "::binary";
+    const block = self::class . "::block";
     const eol = self::class . "::eol";
     const fail = self::class . "::fail";
     const float = self::class . "::float";
@@ -53,6 +54,14 @@ final class Oop
     public static function binary(): self
     {
         return new self(p::binary());
+    }
+
+    public static function block(
+        callable $start,
+        callable $end,
+        callable $escape
+    ): self {
+        return new self(p::block($start, $end, $escape));
     }
 
     public function drop(): self
