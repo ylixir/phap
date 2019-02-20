@@ -72,7 +72,7 @@ $success = $parser("foo bar");
 $fail = $parser("foobar");
 ```
 
-### `end`
+## `end`
 
 This will check to see if we are at the end of input. Success means there is nothing left to parse.
 
@@ -92,6 +92,18 @@ $parser = p::end(p::lit("foo"));
 
 $success = $parser("foo");
 $failure = $parser("foobar");
+```
+
+## `fail`
+
+Always fails.
+
+#### OOP and FP
+
+```php
+$parser = p::fail();
+
+assert(null === $parser("foo"));
 ```
 
 ## `fold`
@@ -128,7 +140,7 @@ $parser = p::fold(
 assert(["flowers"] === $parser("flowerflower"));
 ```
 
-### `lit`
+## `lit`
 
 Checks to see if the unparsed data starts with the *lit*eral.
 
@@ -141,7 +153,7 @@ $success = $parser("foobar");
 $fail = $parser("bar");
 ```
 
-### `map`
+## `map`
 
 This is used to convert raw data to more useful types. For example you might wish to convert a string containing an integer into an actual integer.
 
@@ -167,7 +179,7 @@ $parser = p::map(function (string $s): bool {
 assert([true] == $parser("yes")->parsed);
 ```
 
-### `not`
+## `not`
 
 Fails if the given parser is successful. Succeeds if not.
 
@@ -181,7 +193,7 @@ assert([] === $parser("bar")->parsed);
 assert("bar" === $parser("bar")->unparsed);
 ```
 
-### `or`
+## `or`
 
 Tries a list of parsers in order until one succeeds.
 

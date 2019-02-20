@@ -113,6 +113,13 @@ class FunctionsTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    public function test_fail(): void
+    {
+        $parser = p::fail();
+
+        self::assertEquals(null, $parser("foo"));
+    }
+
     public function float_provider(): array
     {
         return [

@@ -107,6 +107,13 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    public function testFail(): void
+    {
+        $parser = p::fail();
+
+        self::assertEquals(null, $parser("foo"));
+    }
+
     public function floatProvider(): array
     {
         return [

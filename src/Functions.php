@@ -12,6 +12,7 @@ final class Functions
     const drop = self::class . "::drop";
     const end = self::class . "::end";
     const eol = self::class . "::eol";
+    const fail = self::class . "::fail";
     const float = self::class . "::float";
     const fold = self::class . "::fold";
     const hex = self::class . "::hex";
@@ -120,6 +121,16 @@ final class Functions
     public static function eol(): callable
     {
         return self::or(self::lit("\n"), self::lit("\r\n"), self::lit("\r"));
+    }
+
+    /**
+     * @return callable(string):null
+     */
+    public static function fail(): callable
+    {
+        return function (string $s): ?r {
+            return null;
+        };
     }
 
     /**
