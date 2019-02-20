@@ -8,8 +8,19 @@ use Phap\Result as r;
 final class Oop
 {
     //convenience constants for passing functions to functions
+    const binary = self::class . "::binary";
+    const block = self::class . "::block";
+    const eol = self::class . "::eol";
+    const fail = self::class . "::fail";
+    const float = self::class . "::float";
+    const hex = self::class . "::hex";
+    const int = self::class . "::int";
     const lit = self::class . "::lit";
+    const not = self::class . "::not";
+    const octal = self::class . "::octal";
     const pop = self::class . "::pop";
+    const spaces = self::class . "::spaces";
+    const whitespace = self::class . "::whitespace";
 
     /** @var callable(string):?r */
     private $parser;
@@ -40,6 +51,19 @@ final class Oop
         return new self(p::and($this->parser, $tail->parser));
     }
 
+    public static function binary(): self
+    {
+        return new self(p::binary());
+    }
+
+    public static function block(
+        callable $start,
+        callable $end,
+        callable $escape
+    ): self {
+        return new self(p::block($start, $end, $escape));
+    }
+
     public function drop(): self
     {
         return new self(p::drop($this->parser));
@@ -50,12 +74,40 @@ final class Oop
         return new self(p::end($this->parser));
     }
 
+    public static function eol(): self
+    {
+        return new self(p::eol());
+    }
+
+    public static function fail(): self
+    {
+        return new self(p::fail());
+    }
+
+    public static function float(): self
+    {
+        return new self(p::float());
+    }
+
     /**
-     * @param callable(array, mixed):array $f
+     * @template T
+     * @template S
+     * @param callable(T, S...):S[] $f
+     * @param array<int, S> $start
      */
     public function fold(callable $f, array $start = []): self
     {
         return new self(p::fold($f, $start, $this->parser));
+    }
+
+    public static function hex(): self
+    {
+        return new self(p::hex());
+    }
+
+    public static function int(): self
+    {
+        return new self(p::int());
     }
 
     public static function lit(string $c): self
@@ -66,6 +118,16 @@ final class Oop
     public function map(callable $f): self
     {
         return new self(p::map($f, $this->parser));
+    }
+
+    public static function not(callable $p): self
+    {
+        return new self(p::not($p));
+    }
+
+    public static function octal(): self
+    {
+        return new self(p::octal());
     }
 
     public function or(self ...$tail): self
@@ -90,5 +152,15 @@ final class Oop
     public function repeat(): self
     {
         return new self(p::repeat($this->parser));
+    }
+
+    public static function spaces(): self
+    {
+        return new self(p::spaces());
+    }
+
+    public static function whitespace(): self
+    {
+        return new self(p::whitespace());
     }
 }

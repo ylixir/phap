@@ -35,6 +35,60 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function block_provider(): array
+    {
+        return [
+            [
+                p::lit('"'),
+                p::lit('"'),
+                p::lit('""'),
+                '"1""2"',
+                r::make("", ['"', '1', '""', '2', '"']),
+            ],
+            [
+                p::lit('/*'),
+                p::lit('*/'),
+                p::fail(),
+                "/*/*a*/",
+                r::make("", ["/*", "/", "*", "a", "*/"]),
+            ],
+        ];
+    }
+    /**
+     * @dataProvider block_provider
+     */
+    public function test_block(
+        callable $start,
+        callable $end,
+        callable $escape,
+        string $in,
+        ?r $expected
+    ): void {
+        $p = p::block($start, $end, $escape);
+
+        self::assertEquals($expected, $p($in));
+    }
+
+    public function binary_provider(): array
+    {
+        return [
+            ["1", r::make("", [0b1])],
+            ["0", r::make("", [0])],
+            ["101a", r::make("a", [0b101])],
+            ["", null],
+            ["-1", null],
+        ];
+    }
+    /**
+     * @dataProvider binary_provider
+     */
+    public function test_binary(string $input, ?r $expected): void
+    {
+        $p = p::binary();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function drop_provider(): array
     {
         return [
@@ -73,9 +127,69 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function eol_provider(): array
+    {
+        return [
+            ["\n", r::make("", ["\n"])],
+            ["\r\n", r::make("", ["\r\n"])],
+            ["\r", r::make("", ["\r"])],
+            ["\n\r", r::make("\r", ["\n"])],
+            ["", null],
+        ];
+    }
+    /**
+     * @dataProvider eol_provider
+     */
+    public function test_eol(string $input, ?r $expected): void
+    {
+        $p = p::eol();
+
+        self::assertEquals($expected, $p($input));
+    }
+
+    public function test_fail(): void
+    {
+        $parser = p::fail();
+
+        self::assertEquals(null, $parser("foo"));
+    }
+
+    public function float_provider(): array
+    {
+        return [
+            ["10.", r::make("", [10.0])],
+            ["1.0", r::make("", [1.0])],
+            [".1", r::make("", [0.1])],
+
+            ["10E1", r::make("", [100.0])],
+            ["10e-001", r::make("", [1.0])],
+            ["10e+1", r::make("", [100.0])],
+
+            ["10.e001", r::make("", [100.0])],
+            ["1.00E-1", r::make("", [0.1])],
+            [".1E+001", r::make("", [1.0])],
+
+            ["1e00", r::make("", [1.0])],
+
+            ["1.a", r::make("a", [1.0])],
+
+            ["123", null],
+            ["", null],
+        ];
+    }
+    /**
+     * @dataProvider float_provider
+     */
+    public function test_float(string $input, ?r $expected): void
+    {
+        $p = p::float();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function fold_provider(): array
     {
-        $fold = function (array $a, string $s): array {
+        $fold = function (string $s, ...$a): array {
             if ('2' !== $s) {
                 $a[] = $s;
             }
@@ -98,6 +212,48 @@ class FunctionsTest extends TestCase
     ): void {
         $actual = p::fold($f, [], $parser)($input);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function hex_provider(): array
+    {
+        return [
+            ["1a", r::make("", [0x1a])],
+            ["F", r::make("", [0xf])],
+            ["0", r::make("", [0])],
+            ["0xa", r::make("xa", [0])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider hex_provider
+     */
+    public function test_hex(string $input, ?r $expected): void
+    {
+        $p = p::hex();
+
+        self::assertEquals($expected, $p($input));
+    }
+
+    public function int_provider(): array
+    {
+        return [
+            ["123", r::make("", [123])],
+            ["0", r::make("", [0])],
+            ["00", r::make("0", [0])],
+            ["123a", r::make("a", [123])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider int_provider
+     */
+    public function test_int(string $input, ?r $expected): void
+    {
+        $p = p::int();
+
+        self::assertEquals($expected, $p($input));
     }
 
     public function lit_provider(): array
@@ -145,6 +301,40 @@ class FunctionsTest extends TestCase
     ): void {
         $actual = p::map($f, $parser)($input);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function not_provider(): array
+    {
+        return [["foo", "foo", null], ["foo", "bar", r::make("bar", [])]];
+    }
+    /**
+     * @dataProvider not_provider
+     */
+    public function test_not(string $lit, string $in, ?r $expected): void
+    {
+        $parser = p::not(p::lit($lit));
+
+        self::assertEquals($expected, $parser($in));
+    }
+
+    public function octal_provider(): array
+    {
+        return [
+            ["123", r::make("", [0123])],
+            ["0", r::make("", [0])],
+            ["123a", r::make("a", [0123])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider octal_provider
+     */
+    public function test_octal(string $input, ?r $expected): void
+    {
+        $p = p::octal();
+
+        self::assertEquals($expected, $p($input));
     }
 
     public function or_provider(): array
@@ -210,5 +400,33 @@ class FunctionsTest extends TestCase
     ): void {
         $actual = p::repeat($parser)($input);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function spaces_provider(): array
+    {
+        return [[" \t", r::make("", [" ", "\t"])], ["", null]];
+    }
+    /**
+     * @dataProvider spaces_provider
+     */
+    public function test_spaces(string $input, ?r $expected): void
+    {
+        $p = p::spaces();
+
+        self::assertEquals($expected, $p($input));
+    }
+
+    public function whitespace_provider(): array
+    {
+        return [[" \t\r\n", r::make("", [" ", "\t", "\r\n"])], ["", null]];
+    }
+    /**
+     * @dataProvider whitespace_provider
+     */
+    public function test_whitespace(string $input, ?r $expected): void
+    {
+        $p = p::whitespace();
+
+        self::assertEquals($expected, $p($input));
     }
 }

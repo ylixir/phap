@@ -35,6 +35,60 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function binaryProvider(): array
+    {
+        return [
+            ["1", r::make("", [0b1])],
+            ["0", r::make("", [0])],
+            ["101a", r::make("a", [0b101])],
+            ["", null],
+            ["-1", null],
+        ];
+    }
+    /**
+     * @dataProvider binaryProvider
+     */
+    public function testBinary(string $input, ?r $expected): void
+    {
+        $p = p::binary();
+
+        self::assertEquals($expected, $p($input));
+    }
+
+    public function blockProvider(): array
+    {
+        return [
+            [
+                p::lit('"'),
+                p::lit('"'),
+                p::lit('""'),
+                '"1""2"',
+                r::make("", ['"', '1', '""', '2', '"']),
+            ],
+            [
+                p::lit('/*'),
+                p::lit('*/'),
+                p::fail(),
+                "/*/*a*/",
+                r::make("", ["/*", "/", "*", "a", "*/"]),
+            ],
+        ];
+    }
+    /**
+     * @dataProvider blockProvider
+     */
+    public function testBlock(
+        callable $start,
+        callable $end,
+        callable $escape,
+        string $in,
+        ?r $expected
+    ): void {
+        $p = p::block($start, $end, $escape);
+
+        self::assertEquals($expected, $p($in));
+    }
+
     public function dropProvider(): array
     {
         return [
@@ -65,6 +119,134 @@ class OopTest extends TestCase
     {
         $actual = $parser->end()($input);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function eolProvider(): array
+    {
+        return [
+            ["\n", r::make("", ["\n"])],
+            ["\r\n", r::make("", ["\r\n"])],
+            ["\r", r::make("", ["\r"])],
+            ["\n\r", r::make("\r", ["\n"])],
+            ["", null],
+        ];
+    }
+    /**
+     * @dataProvider eolProvider
+     */
+    public function testEol(string $input, ?r $expected): void
+    {
+        $p = p::eol();
+
+        self::assertEquals($expected, $p($input));
+    }
+
+    public function testFail(): void
+    {
+        $parser = p::fail();
+
+        self::assertEquals(null, $parser("foo"));
+    }
+
+    public function floatProvider(): array
+    {
+        return [
+            ["10.", r::make("", [10.0])],
+            ["1.0", r::make("", [1.0])],
+            [".1", r::make("", [0.1])],
+
+            ["10E1", r::make("", [100.0])],
+            ["10e-001", r::make("", [1.0])],
+            ["10e+1", r::make("", [100.0])],
+
+            ["10.e001", r::make("", [100.0])],
+            ["1.00E-1", r::make("", [0.1])],
+            [".1E+001", r::make("", [1.0])],
+
+            ["1e00", r::make("", [1.0])],
+
+            ["1.a", r::make("a", [1.0])],
+
+            ["123", null],
+            ["", null],
+        ];
+    }
+    /**
+     * @dataProvider floatProvider
+     */
+    public function testFloat(string $input, ?r $expected): void
+    {
+        $p = p::float();
+
+        self::assertEquals($expected, $p($input));
+    }
+    public function foldProvider(): array
+    {
+        $fold = function (string $s, ...$a): array {
+            if ('2' !== $s) {
+                $a[] = $s;
+            }
+
+            return $a;
+        };
+        return [
+            ["123", $fold, p::lit("2"), null],
+            ["123", $fold, p::pop()->repeat(), r::make("", ["1", "3"])],
+        ];
+    }
+    /**
+     * @dataProvider foldProvider
+     */
+    public function testFold(
+        string $input,
+        callable $f,
+        p $parser,
+        ?r $expected
+    ): void {
+        $actual = $parser->fold($f)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function hexProvider(): array
+    {
+        return [
+            ["1a", r::make("", [0x1a])],
+            ["F", r::make("", [0xf])],
+            ["0", r::make("", [0])],
+            ["0xa", r::make("xa", [0])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider hexProvider
+     */
+    public function testHex(string $input, ?r $expected): void
+    {
+        $p = p::hex();
+
+        self::assertEquals($expected, $p($input));
+    }
+
+    public function intProvider(): array
+    {
+        return [
+            ["123", r::make("", [123])],
+            ["0", r::make("", [0])],
+            ["00", r::make("0", [0])],
+            ["123a", r::make("a", [123])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider intProvider
+     */
+    public function testInt(string $input, ?r $expected): void
+    {
+        $p = p::int();
+
+        self::assertEquals($expected, $p($input));
     }
 
     public function litProvider(): array
@@ -113,6 +295,40 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function notProvider(): array
+    {
+        return [["foo", "foo", null], ["foo", "bar", r::make("bar", [])]];
+    }
+    /**
+     * @dataProvider notProvider
+     */
+    public function testNot(string $lit, string $in, ?r $expected): void
+    {
+        $parser = p::not(p::lit($lit));
+
+        self::assertEquals($expected, $parser($in));
+    }
+
+    public function octalProvider(): array
+    {
+        return [
+            ["123", r::make("", [0123])],
+            ["0", r::make("", [0])],
+            ["123a", r::make("a", [0123])],
+            ["", null],
+            ["-123", null],
+        ];
+    }
+    /**
+     * @dataProvider octalProvider
+     */
+    public function testOctal(string $input, ?r $expected): void
+    {
+        $p = p::octal();
+
+        self::assertEquals($expected, $p($input));
+    }
+
     public function orProvider(): array
     {
         return [
@@ -157,33 +373,6 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function foldProvider(): array
-    {
-        $fold = function (array $a, string $s): array {
-            if ('2' !== $s) {
-                $a[] = $s;
-            }
-
-            return $a;
-        };
-        return [
-            ["123", $fold, p::lit("2"), null],
-            ["123", $fold, p::pop()->repeat(), r::make("", ["1", "3"])],
-        ];
-    }
-    /**
-     * @dataProvider foldProvider
-     */
-    public function testFold(
-        string $input,
-        callable $f,
-        p $parser,
-        ?r $expected
-    ): void {
-        $actual = $parser->fold($f)($input);
-        $this->assertEquals($expected, $actual);
-    }
-
     public function repeatProvider(): array
     {
         return [
@@ -200,5 +389,33 @@ class OopTest extends TestCase
     {
         $actual = $parser->repeat()($input);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function spacesProvider(): array
+    {
+        return [[" \t", r::make("", [" ", "\t"])], ["", null]];
+    }
+    /**
+     * @dataProvider spacesProvider
+     */
+    public function testSpaces(string $input, ?r $expected): void
+    {
+        $p = p::spaces();
+
+        self::assertEquals($expected, $p($input));
+    }
+
+    public function whitespaceProvider(): array
+    {
+        return [[" \t\r\n", r::make("", [" ", "\t", "\r\n"])], ["", null]];
+    }
+    /**
+     * @dataProvider whitespaceProvider
+     */
+    public function testWhitespace(string $input, ?r $expected): void
+    {
+        $p = p::whitespace();
+
+        self::assertEquals($expected, $p($input));
     }
 }
