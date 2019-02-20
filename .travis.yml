@@ -25,4 +25,4 @@ cache:
         - $HOME/nix.store
 
 after_success:
-    - './travis/deploy'
+    - "./travis/deploy"
