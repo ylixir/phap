@@ -262,6 +262,20 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function not_provider(): array
+    {
+        return [["foo", "foo", null], ["foo", "bar", r::make("bar", [])]];
+    }
+    /**
+     * @dataProvider not_provider
+     */
+    public function test_not(string $lit, string $in, ?r $expected): void
+    {
+        $parser = p::not(p::lit($lit));
+
+        self::assertEquals($expected, $parser($in));
+    }
+
     public function octal_provider(): array
     {
         return [

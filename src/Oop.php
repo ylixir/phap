@@ -14,6 +14,7 @@ final class Oop
     const hex = self::class . "::hex";
     const int = self::class . "::int";
     const lit = self::class . "::lit";
+    const not = self::class . "::not";
     const octal = self::class . "::octal";
     const pop = self::class . "::pop";
     const spaces = self::class . "::spaces";
@@ -102,6 +103,11 @@ final class Oop
     public function map(callable $f): self
     {
         return new self(p::map($f, $this->parser));
+    }
+
+    public static function not(callable $p): self
+    {
+        return new self(p::not($p));
     }
 
     public static function octal(): self

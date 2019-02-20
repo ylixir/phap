@@ -18,6 +18,7 @@ final class Functions
     const int = self::class . "::int";
     const lit = self::class . "::lit";
     const map = self::class . "::map";
+    const not = self::class . "::not";
     const octal = self::class . "::octal";
     const or = self::class . "::or";
     const pop = self::class . "::pop";
@@ -326,6 +327,22 @@ final class Functions
                     return r::make($r->unparsed, $mapped);
                 }
             };
+    }
+
+    /**
+     * @template T
+     * @param callable(string):?r<T> $p
+     * @return callable(string):?r<T>
+     */
+    public static function not(callable $p): callable
+    {
+        return function (string $s) use ($p): ?r {
+            if ($p($s)) {
+                return null;
+            } else {
+                return r::make($s, []);
+            }
+        };
     }
 
     /**

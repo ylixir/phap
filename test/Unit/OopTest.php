@@ -254,6 +254,20 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function notProvider(): array
+    {
+        return [["foo", "foo", null], ["foo", "bar", r::make("bar", [])]];
+    }
+    /**
+     * @dataProvider notProvider
+     */
+    public function testNot(string $lit, string $in, ?r $expected): void
+    {
+        $parser = p::not(p::lit($lit));
+
+        self::assertEquals($expected, $parser($in));
+    }
+
     public function octalProvider(): array
     {
         return [

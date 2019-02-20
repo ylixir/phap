@@ -167,6 +167,20 @@ $parser = p::map(function (string $s): bool {
 assert([true] == $parser("yes")->parsed);
 ```
 
+### `not`
+
+Fails if the given parser is successful. Succeeds if not.
+
+#### OOP and FP
+
+```php
+$parser = p::not(p::lit("foo"));
+
+assert(null === $parser("foo"));
+assert([] === $parser("bar")->parsed);
+assert("bar" === $parser("bar")->unparsed);
+```
+
 ### `or`
 
 Tries a list of parsers in order until one succeeds.
