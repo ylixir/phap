@@ -1,5 +1,6 @@
 let
 pkgs = import <nixpkgs> {};
+jekyll_env = import jekyll/jekyll.nix;
 phpdebug = import ./phpdebug/phpdebug.nix (with pkgs;
     { inherit
         makeWrapper
@@ -19,6 +20,7 @@ in
     cacert
     gnugrep
     gnused
+    jekyll_env
   ]
 
 

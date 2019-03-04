@@ -1,5 +1,6 @@
 let
 pkgs = import <nixpkgs> {};
+jekyll_env = import jekyll/jekyll.nix;
 in
   with pkgs; [
     php
@@ -9,4 +10,5 @@ in
     cacert
     gnugrep
     gnused
+    jekyll_env
   ]
