@@ -16,8 +16,8 @@ In the meantime, you can get an idea of where we stand by perusing the waffle bo
 
 Example code can be found here:
 
--   [object oriented](test/integration/OopExamples.php)
--   [functional](test/integration/functional_examples.php)
+-   [object oriented](test/Integration/OopExamples.php)
+-   [functional](test/Integration/functional_examples.php)
 
 # Contributions
 

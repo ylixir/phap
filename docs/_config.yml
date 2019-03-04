@@ -17,8 +17,6 @@ author:
 
 paginate: 5
 
-exclude:
-    - vendor
 # Custom vars
 
 github:

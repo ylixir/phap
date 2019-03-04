@@ -36,17 +36,17 @@ Use the command with the provided script by running `./go <command>`
 
 | command       | description                                                                               |
 | ------------- | ----------------------------------------------------------------------------------------- |
-| jekyll        | Fires up a jekyll server for editing the web site                                         |
-| debug         | Drops us into a shell prompt with `php` configured with `xdebug`.                         |
-| run           | Drops us into a shell prompt with `xdebug` disabled.                                      |
-| init          | Set's up and installs the dependencies for the project.                                   |
-| version       | Get the current version of the library.                                                   |
-| tagged        | Check if the currenct version has a release tag yet.                                      |
-| tag           | Create a new version tag.                                                                 |
-| format-verify | Make sure that all code has been properly formatted.                                      |
-| format        | Automatically reformat all source code.                                                   |
-| strict-types  | Make sure all php source files have `strict_types` turned on.                             |
-| lint          | Check source code for errors with `psalm`                                                 |
-| test-debug    | Run unit tests with `xdebug` enabled (slow).                                              |
-| test          | Run unit tests with no debugging (faster).                                                |
 | check         | Run this before opening a pull request. Combines `format`, `test`, `lint`, `strict-types` |
+| debug         | Drops us into a shell prompt with `php` configured with `xdebug`.                         |
+| format        | Automatically reformat all source code.                                                   |
+| format-verify | Make sure that all code has been properly formatted.                                      |
+| init          | Set's up and installs the dependencies for the project.                                   |
+| jekyll        | Fires up a jekyll server for editing the web site                                         |
+| lint          | Check source code for errors with `psalm`                                                 |
+| run           | Drops us into a shell prompt with `xdebug` disabled.                                      |
+| strict-types  | Make sure all php source files have `strict_types` turned on.                             |
+| tag           | Create a new version tag.                                                                 |
+| tagged        | Check if the currenct version has a release tag yet.                                      |
+| test          | Run unit tests with no debugging (faster).                                                |
+| test-debug    | Run unit tests with `xdebug` enabled (slow).                                              |
+| version       | Get the current version of the library.                                                   |

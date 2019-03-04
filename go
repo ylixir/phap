@@ -141,7 +141,7 @@ function check {
 }
 
 function jekyll {
-    run jekyll serve
+    run jekyll serve -s docs -d docs/_site
 }
 
 $1 ${@:2}
