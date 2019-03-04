@@ -68,7 +68,7 @@ final class Functions
     public static function binary(): callable
     {
         /**
-         * @var array<int, callable(string):?r<string>>
+         * @var callable(string):?r<string>
          */
         $digits = self::or(self::lit("0"), self::lit("1"));
 
