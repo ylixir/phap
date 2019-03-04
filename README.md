@@ -14,8 +14,6 @@ In the meantime, you can get an idea of where we stand by perusing the waffle bo
 
 # Reference
 
-You may read the [documentation for the API here](docs/api.md).
-
 Example code can be found here:
 
 -   [object oriented](test/integration/OopExamples.php)
@@ -25,7 +23,7 @@ Example code can be found here:
 
 Any and all help is greatly appreciated. Feel free to open pull requests, issues, start a conversation on an issue, etc.
 
-We provide a dedicated development environment to make it easy to get started. You can find [documentation here](docs/go.md).
+We provide a dedicated development environment to make it easy to get started.
 
 # Travis builds
 
