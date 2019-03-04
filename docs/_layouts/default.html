@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 
-  {% include head.html %}
+{% include head.html %}
 
-  <body class="theme-base-0e">
+<body class="theme-base-0e">
 
-    {% include sidebar.html %}
+  {% include sidebar.html %}
 
-    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+  <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
          content to avoid any CSS collisions with our real content. -->
-    <div class="wrap">
+  <div class="wrap">
+    <div>
       <div class="masthead">
         <div class="container">
           <label for="sidebar-checkbox" class="sidebar-toggle"></label>
@@ -25,6 +26,8 @@
         {{ content }}
       </div>
     </div>
+  </div>
 
-  </body>
+</body>
+
 </html>
