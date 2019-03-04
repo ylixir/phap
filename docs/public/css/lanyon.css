@@ -64,7 +64,15 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   width: 100%;
 }
+.wrap div {
+  margin: 0;
+}
 
+@media (min-width: 48em) {
+  .wrap div {
+    margin-right: 7rem;
+  }
+}
 
 /*
  * Container
@@ -75,16 +83,18 @@ h1, h2, h3, h4, h5, h6 {
 .container {
   max-width: 28rem;
 }
-@media (min-width: 38em) {
+@media (min-width: 48em) {
   .container {
     max-width: 32rem;
   }
 }
+/*
 @media (min-width: 56em) {
   .container {
     max-width: 38rem;
   }
 }
+*/
 
 
 /*
@@ -155,7 +165,7 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-transition: all .3s ease-in-out;
           transition: all .3s ease-in-out;
 }
-@media (min-width: 30em) {
+@media (min-width: 48em) {
   .sidebar {
     font-size: .75rem; /* 14px */
   }
@@ -249,7 +259,7 @@ a.sidebar-nav-item:focus {
   background-image:         linear-gradient(to bottom, #fff, #fff 20%, #555 20%, #555 40%, #fff 40%, #fff 60%, #555 60%, #555 80%, #fff 80%, #fff 100%);
 }
 
-@media (min-width: 30.1em) {
+@media (min-width: 48em) {
   .sidebar-toggle {
     position: fixed;
   }
@@ -300,7 +310,7 @@ a.sidebar-nav-item:focus {
 }
 
 /* invert behavior for desktop */
-@media (min-width: 30.1em) {
+@media (min-width: 48em) {
   .sidebar {
     z-index: 10;
     visibility: visible;
@@ -404,7 +414,7 @@ a.pagination-item:hover {
   background-color: #f5f5f5;
 }
 
-@media (min-width: 30em) {
+@media (min-width: 48em) {
   .pagination {
     margin: 3rem 0;
   }
