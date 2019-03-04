@@ -64,13 +64,13 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   width: 100%;
 }
-.wrap div {
+.wrap > div {
   margin: 0;
 }
 
 @media (min-width: 48em) {
-  .wrap div {
-    margin-right: 7rem;
+  .wrap > div {
+    margin-right: 14rem;
   }
 }
 
@@ -85,7 +85,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 @media (min-width: 48em) {
   .container {
-    max-width: 32rem;
+    max-width: 58rem;
   }
 }
 /*
