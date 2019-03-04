@@ -3,6 +3,9 @@ layout: default
 title: Home
 ---
 
+{% capture readme %}{% include_relative plug.md %}{% endcapture %}
+{{ readme | markdownify }}
+
 <div class="posts">
   {% for post in paginator.posts %}
   <div class="post">
@@ -35,6 +38,3 @@ title: Home
     <span class="pagination-item newer">Newer</span>
   {% endif %}
 </div>
-
-{% capture readme %}{% include_relative README.md %}{% endcapture %}
-{{ readme | markdownify }}
