@@ -1,6 +1,7 @@
 /vendor/
 /node_modules/
 /.psalm-cache/
+/_site/
 
 yarn.lock
 composer.lock

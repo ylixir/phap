@@ -1,4 +1,9 @@
-# Bring it in
+---
+layout: page
+title: "API: Core"
+---
+
+## Bring it in
 
 We provide two equivalent APIs. One "functional programming" (FP) and one "object oriented programming" (OOP). Neither is better. we have tried to make the object API have natural language patterns, while the functional API should have more consistent (orthogonal) patterns.
 

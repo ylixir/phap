@@ -140,5 +140,8 @@ function check {
     && strict-types tests src
 }
 
+function jekyll {
+    run jekyll serve
+}
 
 $1 ${@:2}
