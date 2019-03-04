@@ -1,0 +1,25 @@
+# Dependencies
+#markdown: redcarpet
+highlighter: pygments
+
+# Permalinks
+permalink: pretty
+
+# Setup
+title: Phap
+tagline: "PHP has another parser"
+description: "A super simple literate and functional tool for creating parsers (and lexers)."
+url: https://ylixir.github.io/phap
+
+author:
+    name: "Jon Allen"
+    url: https://ylixir.github.io
+
+paginate: 5
+
+# Custom vars
+
+github:
+    repo: ylixir/phap
+
+plugins: [jekyll-paginate]
