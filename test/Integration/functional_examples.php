@@ -8,66 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 class functional_examples extends TestCase
 {
-    public static function integer_parser(): callable
-    {
-        //any digit will do
-        /** @var array<int,callable(string):?r> */
-        $litDigits = array_map(p::lit, range("0", "9"));
-        $anyDigit = p::or(...$litDigits);
-
-        //we can have as many as we want, but we need at least one
-        $allDigits = p::and($anyDigit, p::repeat($anyDigit));
-
-        //convert the digits to actual integers from characters
-        $intArray = p::map('intval', $allDigits);
-
-        //reduce the separate digits into one
-        $integer = p::fold(
-            function (int $i, int $a, int ...$tail): array {
-                return [$a * 10 + $i];
-            },
-            [0],
-            $intArray
-        );
-
-        return $integer;
-    }
-
-    public function parse_integer_provider(): array
-    {
-        return [
-            ["abc", null],
-            ["1", r::make("", [1])],
-            ["123", r::make("", [123])],
-            ["12a", r::make("a", [12])],
-            [" 1", null],
-            ["1 ", r::make(" ", [1])],
-            ["1 2", r::make(" 2", [1])],
-        ];
-    }
-    /**
-     * @dataProvider parse_integer_provider
-     */
-    public function test_parse_integer(string $in, ?r $expected): void
-    {
-        $parse = self::integer_parser();
-        static::assertEquals($expected, $parse($in));
-    }
-
-    public function parse_ended_integer_provider(): array
-    {
-        return [["123", r::make("", [123])], ["12a", null]];
-    }
-    /**
-     * @dataProvider parse_ended_integer_provider
-     */
-    public function test_parse_ended_integer(string $in, ?r $expected): void
-    {
-        //we can use end to make sure we don't have extra garbage
-        $parse = p::end(self::integer_parser());
-        static::assertEquals($expected, $parse($in));
-    }
-
     /**
      * @var array<string,string> $keyValues the keys are in the string between moustaches
      */
