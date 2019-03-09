@@ -19,25 +19,13 @@ If the parse fails then you get back a `null`.
 
 If the parse succeeds, then you get back a `Phap\Result`. This result object has two read only properties: `parsed` and `unparsed`. The former is an array, the latter is a string.
 
-## `and`
-
-This command checks for a sequence of matches, returning success only if all children parsers also return success.
-
-```php
-// parse "foobar"
-$parser = p::and(p::lit("foo"), p::lit("bar"));
-
-$success = $parser("foobar");
-$fail = $parser("zoobaz");
-```
-
 ## `drop`
 
 This function discards the parsed data. This might be useful for dropping whitespace for example.
 
 ```php
 // parse "foo bar" into ["foo", "bar"]
-$parser = p::and(p::lit("foo"), p::drop(p::lit(" ")), p::lit("bar"));
+$parser = p::sequence(p::lit("foo"), p::drop(p::lit(" ")), p::lit("bar"));
 
 $success = $parser("foo bar");
 $fail = $parser("foobar");
@@ -70,7 +58,7 @@ Similar to `array_reduce`, this function can be used to combine values. For exam
 
 ```php
 $flower = p::lit("flower");
-$flowers = p::and($flower, $flower);
+$flowers = p::sequence($flower, $flower);
 
 $parser = p::fold(
     function (string $in, string ...$acc): array {
@@ -148,4 +136,16 @@ Just keep trying the same parser until it fails.
 $parser = p::repeat(p::lit("1"));
 
 assert(["1", "1", "1"] === $parser("111"));
+```
+
+## `sequence`
+
+This command checks for a sequence of matches, returning success only if all children parsers also return success.
+
+```php
+// parse "foobar"
+$parser = p::sequence(p::lit("foo"), p::lit("bar"));
+
+$success = $parser("foobar");
+$fail = $parser("zoobaz");
 ```

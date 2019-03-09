@@ -54,7 +54,7 @@ final class Oop
                 $tail = $tail[0]->and(...array_slice($tail, 1));
         }
 
-        return new self(p::and($this->parser, $tail->parser));
+        return new self(p::sequence($this->parser, $tail->parser));
     }
 
     /**

@@ -22,8 +22,8 @@ class functional_examples extends TestCase
 
         // find the interpolation begin and end tokens
         $spaces = p::repeat(p::lit(" "));
-        $open = p::drop(p::and(p::lit("{{"), $spaces));
-        $close = p::drop(p::and($spaces, p::lit("}}")));
+        $open = p::drop(p::sequence(p::lit("{{"), $spaces));
+        $close = p::drop(p::sequence($spaces, p::lit("}}")));
 
         //parse the interpolation strings: only match keys passed in
         /** @var array<int,callable(string):?r> */
@@ -31,7 +31,7 @@ class functional_examples extends TestCase
         $key = p::or(...$keyParsers);
 
         //extract the key from between the start and end tokens
-        $interpolate = p::and($open, $key, $close);
+        $interpolate = p::sequence($open, $key, $close);
 
         //function to convert some keys to values
         $keyToValue = function (string $key) use ($keyValues): string {

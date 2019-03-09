@@ -8,33 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 class FunctionsTest extends TestCase
 {
-    public function and_provider(): array
-    {
-        return [
-            ["123", [p::lit("1")], r::make("23", ["1"])],
-            ["123", [p::lit("2")], null],
-            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
-            [
-                "123",
-                [p::lit("1"), p::lit("2"), p::lit("3")],
-                r::make("", ["1", "2", "3"]),
-            ],
-            ["123", [p::lit("2"), p::lit("1")], null],
-            ["123", [p::lit("2"), p::lit("3")], null],
-            ["", [p::lit("2")], null],
-            ["", [p::lit("2"), p::lit("3")], null],
-        ];
-    }
-    /**
-     * @dataProvider and_provider
-     * @param array<int, callable(string):?r> $parsers
-     */
-    public function test_and(string $input, array $parsers, ?r $expected): void
-    {
-        $actual = p::and(...$parsers)($input);
-        $this->assertEquals($expected, $actual);
-    }
-
     public function block_provider(): array
     {
         return [
@@ -428,5 +401,35 @@ class FunctionsTest extends TestCase
         $p = p::whitespace();
 
         self::assertEquals($expected, $p($input));
+    }
+
+    public function sequence_provider(): array
+    {
+        return [
+            ["123", [p::lit("1")], r::make("23", ["1"])],
+            ["123", [p::lit("2")], null],
+            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
+            [
+                "123",
+                [p::lit("1"), p::lit("2"), p::lit("3")],
+                r::make("", ["1", "2", "3"]),
+            ],
+            ["123", [p::lit("2"), p::lit("1")], null],
+            ["123", [p::lit("2"), p::lit("3")], null],
+            ["", [p::lit("2")], null],
+            ["", [p::lit("2"), p::lit("3")], null],
+        ];
+    }
+    /**
+     * @dataProvider sequence_provider
+     * @param array<int, callable(string):?r> $parsers
+     */
+    public function test_sequence(
+        string $input,
+        array $parsers,
+        ?r $expected
+    ): void {
+        $actual = p::sequence(...$parsers)($input);
+        $this->assertEquals($expected, $actual);
     }
 }
