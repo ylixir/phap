@@ -19,6 +19,17 @@ If the parse fails then you get back a `null`.
 
 If the parse succeeds, then you get back a `Phap\Result`. This result object has two read only properties: `parsed` and `unparsed`. The former is an array, the latter is a string.
 
+## `alternatives`
+
+Tries a list of parsers in order until one succeeds.
+
+```php
+$parser = p::alternatives(p::lit("foo"), p::lit("hello"));
+
+$success = $parser("foobar");
+$success = $parser("hello world");
+```
+
 ## `drop`
 
 This function discards the parsed data. This might be useful for dropping whitespace for example.
@@ -105,17 +116,6 @@ $parser = p::not(p::lit("foo"));
 assert(null === $parser("foo"));
 assert([] === $parser("bar")->parsed);
 assert("bar" === $parser("bar")->unparsed);
-```
-
-## `or`
-
-Tries a list of parsers in order until one succeeds.
-
-```php
-$parser = p::or(p::lit("foo"), p::lit("hello"));
-
-$success = $parser("foobar");
-$success = $parser("hello world");
 ```
 
 ## `pop`

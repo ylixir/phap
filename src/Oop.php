@@ -190,7 +190,7 @@ final class Oop
             default:
                 $tail = $tail[0]->or(...array_slice($tail, 1));
         }
-        return new self(p::or($this->parser, $tail->parser));
+        return new self(p::alternatives($this->parser, $tail->parser));
     }
 
     /**

@@ -28,7 +28,7 @@ class functional_examples extends TestCase
         //parse the interpolation strings: only match keys passed in
         /** @var array<int,callable(string):?r> */
         $keyParsers = array_map(p::lit, array_keys($keyValues));
-        $key = p::or(...$keyParsers);
+        $key = p::alternatives(...$keyParsers);
 
         //extract the key from between the start and end tokens
         $interpolate = p::sequence($open, $key, $close);
@@ -43,7 +43,7 @@ class functional_examples extends TestCase
         $value = p::map($keyToValue, $interpolate);
 
         //try to interpolate, if we can't just eat a code point and try again
-        $munch = p::repeat(p::or($value, p::pop()));
+        $munch = p::repeat(p::alternatives($value, p::pop()));
 
         //parse it by passing the string to $munch
         return implode("", $munch($s)->parsed ?? [$s]);
