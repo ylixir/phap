@@ -15,8 +15,7 @@ In the meantime, you can get an idea of where we stand by perusing the [waffle b
 
 ## Example code
 
--   [object oriented](https://github.com/ylixir/phap/blob/master/test/Integration/OopExamples.php)
--   [functional](https://github.com/ylixir/phap/blob/master/test/Integration/functional_examples.php)
+[Right here](https://github.com/ylixir/phap/blob/master/test/Integration/functional_examples.php)
 
 ## References
 
