@@ -89,7 +89,7 @@ final class Oop
      */
     public function end(): self
     {
-        return new self(p::end($this->parser));
+        return new self(p::sequence($this->parser, p::end()));
     }
 
     /**

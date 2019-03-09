@@ -117,18 +117,15 @@ final class Functions
     }
 
     /**
-     * @param callable(string):?r $p
      * @return callable(string):?r
      */
-    public static function end(callable $p): callable
+    public static function end(): callable
     {
-        return function (string $in) use ($p): ?r {
-            $r = $p($in);
-
-            if (null === $r || '' !== $r->unparsed) {
-                return null;
+        return function (string $in): ?r {
+            if ('' === $in) {
+                return r::make('', []);
             } else {
-                return $r;
+                return null;
             }
         };
     }

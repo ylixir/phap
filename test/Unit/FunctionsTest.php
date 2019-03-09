@@ -126,7 +126,7 @@ class FunctionsTest extends TestCase
         callable $parser,
         ?r $expected
     ): void {
-        $actual = p::end($parser)($input);
+        $actual = p::sequence($parser, p::end())($input);
         $this->assertEquals($expected, $actual);
     }
 
