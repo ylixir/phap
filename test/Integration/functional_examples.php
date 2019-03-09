@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace Test\Integration;
 
 use Phap\Functions as p;
-use Phap\Result as r;
 use PHPUnit\Framework\TestCase;
 
 class functional_examples extends TestCase
@@ -20,66 +19,56 @@ class functional_examples extends TestCase
             return $s;
         }
 
-        // find the interpolation begin and end tokens
-        $spaces = p::repeat(p::lit(" "));
-        $open = p::drop(p::sequence(p::lit("{{"), $spaces));
-        $close = p::drop(p::sequence($spaces, p::lit("}}")));
-
-        //parse the interpolation strings: only match keys passed in
-        /** @var array<int,callable(string):?r> */
-        $keyParsers = array_map(p::lit, array_keys($keyValues));
-        $key = p::alternatives(...$keyParsers);
-
-        //extract the key from between the start and end tokens
-        $interpolate = p::sequence($open, $key, $close);
-
-        //function to convert some keys to values
-        $keyToValue = function (string $key) use ($keyValues): string {
-            /** @var string */ $value = $keyValues[$key];
-            return $value;
+        // create a parser for for a key-value pair that converts the key to the value
+        $keyToValue = function (string $key, string $value): callable {
+            $f = function (string $s) use ($value): string {
+                return $value;
+            };
+            return p::map($f, p::lit($key));
         };
 
-        // convert the inperpolated key tokens to their values
-        $value = p::map($keyToValue, $interpolate);
+        // create a parser for each key-value pair we are given
+        /** @var array<int,string> */
+        $keys = array_keys($keyValues);
+        $keyParsers = array_map($keyToValue, $keys, $keyValues);
 
-        //try to interpolate, if we can't just eat a code point and try again
-        $munch = p::repeat(p::alternatives($value, p::pop()));
+        $open = p::drop(p::sequence(p::lit("{{"), p::spaces()));
+        $close = p::drop(p::sequence(p::spaces(), p::lit("}}")));
+
+        $interpolate = p::sequence(
+            $open,
+            p::alternatives(...$keyParsers),
+            $close
+        );
+
+        $success = p::not(p::fail());
+        $parser = p::block($success, p::end(), $interpolate);
 
         //parse it by passing the string to $munch
-        return implode("", $munch($s)->parsed ?? [$s]);
+        return implode("", $parser($s)->parsed ?? [$s]);
     }
 
     public function interpolation_provider(): array
     {
         return [
+            //standard case
+            [
+                "a {{     b   }} {{ c }}c",
+                ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
+                "a bar helloc",
+            ],
+
+            //edge cases
             ["abc", [], "abc"],
-            ["a{{b}}c", [], "a{{b}}c"],
-            ["a{{b}}c", ['b' => 'abc'], "aabcc"],
+            ["a{{ b }}c", [], "a{{ b }}c"],
             [
-                "a{{d}}c",
+                "a{{ d }}c",
                 ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
-                "a{{d}}c",
-            ],
-            ["a{{b}}c", ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'], "abarc"],
-            [
-                "a {{b}} c",
-                ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
-                "a bar c",
-            ],
-            ["a{{ b}}c", ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'], "abarc"],
-            ["a{{b }}c", ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'], "abarc"],
-            [
-                "a{{     b   }}c",
-                ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
-                "abarc",
-            ],
-            [
-                "{{a}}{{b}}{{c}}",
-                ['a' => 'foo', 'b' => 'bar', 'c' => 'hello'],
-                "foobarhello",
+                "a{{ d }}c",
             ],
         ];
     }
+
     /**
      * @dataProvider interpolation_provider
      */
