@@ -5,7 +5,7 @@ namespace Test\Integration;
 use Phap\Functions as p;
 use PHPUnit\Framework\TestCase;
 
-class functional_examples extends TestCase
+class StringInterpolationTest extends TestCase
 {
     /**
      * @var array<string,string> $keyValues the keys are in the string between moustaches
