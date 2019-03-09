@@ -8,6 +8,9 @@ use PHPUnit\Framework\TestCase;
 
 class OopTest extends TestCase
 {
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function andProvider(): array
     {
         return [
@@ -26,6 +29,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider andProvider
      * @param array<int, p> $parsers
      */
@@ -35,6 +39,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function binaryProvider(): array
     {
         return [
@@ -46,6 +53,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider binaryProvider
      */
     public function testBinary(string $input, ?r $expected): void
@@ -55,6 +63,9 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function blockProvider(): array
     {
         return [
@@ -75,6 +86,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider blockProvider
      */
     public function testBlock(
@@ -89,6 +101,9 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($in));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function dropProvider(): array
     {
         return [
@@ -97,6 +112,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider dropProvider
      */
     public function testDrop(string $input, p $parser, ?r $expected): void
@@ -105,6 +121,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function endProvider(): array
     {
         return [
@@ -113,6 +132,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider endProvider
      */
     public function testEnd(string $input, p $parser, ?r $expected): void
@@ -121,6 +141,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function eolProvider(): array
     {
         return [
@@ -132,6 +155,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider eolProvider
      */
     public function testEol(string $input, ?r $expected): void
@@ -141,6 +165,9 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function testFail(): void
     {
         $parser = p::fail();
@@ -148,6 +175,9 @@ class OopTest extends TestCase
         self::assertEquals(null, $parser("foo"));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function floatProvider(): array
     {
         return [
@@ -172,6 +202,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider floatProvider
      */
     public function testFloat(string $input, ?r $expected): void
@@ -180,6 +211,9 @@ class OopTest extends TestCase
 
         self::assertEquals($expected, $p($input));
     }
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function foldProvider(): array
     {
         $fold = function (string $s, ...$a): array {
@@ -195,6 +229,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider foldProvider
      */
     public function testFold(
@@ -207,6 +242,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function hexProvider(): array
     {
         return [
@@ -219,6 +257,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider hexProvider
      */
     public function testHex(string $input, ?r $expected): void
@@ -228,6 +267,9 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function intProvider(): array
     {
         return [
@@ -240,6 +282,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider intProvider
      */
     public function testInt(string $input, ?r $expected): void
@@ -249,6 +292,9 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function litProvider(): array
     {
         return [
@@ -267,6 +313,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider litProvider
      */
     public function testLit(string $input, string $char, ?r $expected): void
@@ -275,6 +322,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function mapProvider(): array
     {
         return [
@@ -283,6 +333,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider mapProvider
      */
     public function testMap(
@@ -295,11 +346,15 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function notProvider(): array
     {
         return [["foo", "foo", null], ["foo", "bar", r::make("bar", [])]];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider notProvider
      */
     public function testNot(string $lit, string $in, ?r $expected): void
@@ -309,6 +364,9 @@ class OopTest extends TestCase
         self::assertEquals($expected, $parser($in));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function octalProvider(): array
     {
         return [
@@ -320,6 +378,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider octalProvider
      */
     public function testOctal(string $input, ?r $expected): void
@@ -329,6 +388,9 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function orProvider(): array
     {
         return [
@@ -347,6 +409,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider orProvider
      * @param array<int, p> $parsers
      */
@@ -356,6 +419,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function popProvider(): array
     {
         return [
@@ -365,6 +431,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider popProvider
      */
     public function testPop(string $input, ?r $expected): void
@@ -373,6 +440,9 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function repeatProvider(): array
     {
         return [
@@ -383,6 +453,7 @@ class OopTest extends TestCase
         ];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider repeatProvider
      */
     public function testRepeat(string $input, p $parser, r $expected): void
@@ -391,11 +462,15 @@ class OopTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function spacesProvider(): array
     {
         return [[" \t", r::make("", [" ", "\t"])], ["", null]];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider spacesProvider
      */
     public function testSpaces(string $input, ?r $expected): void
@@ -405,11 +480,15 @@ class OopTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
+    /**
+     * @psalm-suppress DeprecatedClass
+     */
     public function whitespaceProvider(): array
     {
         return [[" \t\r\n", r::make("", [" ", "\t", "\r\n"])], ["", null]];
     }
     /**
+     * @psalm-suppress DeprecatedClass
      * @dataProvider whitespaceProvider
      */
     public function testWhitespace(string $input, ?r $expected): void
