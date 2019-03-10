@@ -8,7 +8,6 @@ final class Functions
 {
     //convenience constants for passing functions to functions
     const alternatives = self::class . "::alternatives";
-    const and = self::class . "::and";
     const binary = self::class . "::binary";
     const drop = self::class . "::drop";
     const end = self::class . "::end";
@@ -22,7 +21,6 @@ final class Functions
     const map = self::class . "::map";
     const not = self::class . "::not";
     const octal = self::class . "::octal";
-    const or = self::class . "::or";
     const pop = self::class . "::pop";
     const repeat = self::class . "::repeat";
     const sequence = self::class . "::sequence";
@@ -50,17 +48,6 @@ final class Functions
         return function (string $input) use ($head, $tail): ?r {
             return $head($input) ?? $tail($input);
         };
-    }
-
-    /**
-     * @deprecated replaced with `sequence` function
-     * @param callable(string):?r $head
-     * @param array<int,callable(string):?r> $tail
-     * @return callable(string):?r
-     */
-    public static function and(callable $head, callable ...$tail): callable
-    {
-        return self::sequence($head, ...$tail);
     }
 
     /**
@@ -403,17 +390,6 @@ final class Functions
         };
 
         return self::fold($intVal, [0], $intString);
-    }
-
-    /**
-     * @param callable(string):?r $head
-     * @param callable(string):?r ...$tail
-     * @return callable(string):?r
-     * @deprecated use `alternatives` instead
-     */
-    public static function or(callable $head, callable ...$tail): callable
-    {
-        return self::alternatives($head, ...$tail);
     }
 
     /**
