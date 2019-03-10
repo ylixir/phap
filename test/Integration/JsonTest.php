@@ -234,6 +234,7 @@ class JsonTest extends TestCase
             ["true"],
             ["false"],
             ["null"],
+            ["\u002f"],
             ["1"],
             ['"foo"'],
             ["[]"],
