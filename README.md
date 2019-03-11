@@ -14,10 +14,7 @@ In the meantime, you can get an idea of where we stand by perusing the waffle bo
 
 # Reference
 
-Example code can be found here:
-
--   [object oriented](test/Integration/OopExamples.php)
--   [functional](test/Integration/functional_examples.php)
+Example code [can be found here](test/Integration/functional_examples.php)
 
 # Contributions
 

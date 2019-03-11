@@ -8,30 +8,33 @@ use PHPUnit\Framework\TestCase;
 
 class FunctionsTest extends TestCase
 {
-    public function and_provider(): array
+    public function alternatives_provider(): array
     {
         return [
             ["123", [p::lit("1")], r::make("23", ["1"])],
             ["123", [p::lit("2")], null],
-            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
+            ["123", [p::lit("1"), p::lit("2")], r::make("23", ["1"])],
+            ["123", [p::lit("2"), p::lit("1")], r::make("23", ["1"])],
             [
                 "123",
-                [p::lit("1"), p::lit("2"), p::lit("3")],
-                r::make("", ["1", "2", "3"]),
+                [p::lit("3"), p::lit("2"), p::lit("1")],
+                r::make("23", ["1"]),
             ],
-            ["123", [p::lit("2"), p::lit("1")], null],
             ["123", [p::lit("2"), p::lit("3")], null],
             ["", [p::lit("2")], null],
             ["", [p::lit("2"), p::lit("3")], null],
         ];
     }
     /**
-     * @dataProvider and_provider
+     * @dataProvider alternatives_provider
      * @param array<int, callable(string):?r> $parsers
      */
-    public function test_and(string $input, array $parsers, ?r $expected): void
-    {
-        $actual = p::and(...$parsers)($input);
+    public function test_alternatives(
+        string $input,
+        array $parsers,
+        ?r $expected
+    ): void {
+        $actual = p::alternatives(...$parsers)($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -123,7 +126,7 @@ class FunctionsTest extends TestCase
         callable $parser,
         ?r $expected
     ): void {
-        $actual = p::end($parser)($input);
+        $actual = p::sequence($parser, p::end())($input);
         $this->assertEquals($expected, $actual);
     }
 
@@ -337,33 +340,6 @@ class FunctionsTest extends TestCase
         self::assertEquals($expected, $p($input));
     }
 
-    public function or_provider(): array
-    {
-        return [
-            ["123", [p::lit("1")], r::make("23", ["1"])],
-            ["123", [p::lit("2")], null],
-            ["123", [p::lit("1"), p::lit("2")], r::make("23", ["1"])],
-            ["123", [p::lit("2"), p::lit("1")], r::make("23", ["1"])],
-            [
-                "123",
-                [p::lit("3"), p::lit("2"), p::lit("1")],
-                r::make("23", ["1"]),
-            ],
-            ["123", [p::lit("2"), p::lit("3")], null],
-            ["", [p::lit("2")], null],
-            ["", [p::lit("2"), p::lit("3")], null],
-        ];
-    }
-    /**
-     * @dataProvider or_provider
-     * @param array<int, callable(string):?r> $parsers
-     */
-    public function test_or(string $input, array $parsers, ?r $expected): void
-    {
-        $actual = p::or(...$parsers)($input);
-        $this->assertEquals($expected, $actual);
-    }
-
     public function pop_provider(): array
     {
         return [
@@ -428,5 +404,35 @@ class FunctionsTest extends TestCase
         $p = p::whitespace();
 
         self::assertEquals($expected, $p($input));
+    }
+
+    public function sequence_provider(): array
+    {
+        return [
+            ["123", [p::lit("1")], r::make("23", ["1"])],
+            ["123", [p::lit("2")], null],
+            ["123", [p::lit("1"), p::lit("2")], r::make("3", ["1", "2"])],
+            [
+                "123",
+                [p::lit("1"), p::lit("2"), p::lit("3")],
+                r::make("", ["1", "2", "3"]),
+            ],
+            ["123", [p::lit("2"), p::lit("1")], null],
+            ["123", [p::lit("2"), p::lit("3")], null],
+            ["", [p::lit("2")], null],
+            ["", [p::lit("2"), p::lit("3")], null],
+        ];
+    }
+    /**
+     * @dataProvider sequence_provider
+     * @param array<int, callable(string):?r> $parsers
+     */
+    public function test_sequence(
+        string $input,
+        array $parsers,
+        ?r $expected
+    ): void {
+        $actual = p::sequence(...$parsers)($input);
+        $this->assertEquals($expected, $actual);
     }
 }

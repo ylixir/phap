@@ -7,7 +7,7 @@ use Phap\Result as r;
 final class Functions
 {
     //convenience constants for passing functions to functions
-    const and = self::class . "::and";
+    const alternatives = self::class . "::alternatives";
     const binary = self::class . "::binary";
     const drop = self::class . "::drop";
     const end = self::class . "::end";
@@ -21,19 +21,21 @@ final class Functions
     const map = self::class . "::map";
     const not = self::class . "::not";
     const octal = self::class . "::octal";
-    const or = self::class . "::or";
     const pop = self::class . "::pop";
     const repeat = self::class . "::repeat";
+    const sequence = self::class . "::sequence";
     const spaces = self::class . "::spaces";
     const whitespace = self::class . "::whitespace";
 
     /**
      * @param callable(string):?r $head
-     * @param array<int,callable(string):?r> $tail
+     * @param callable(string):?r ...$tail
      * @return callable(string):?r
      */
-    public static function and(callable $head, callable ...$tail): callable
-    {
+    public static function alternatives(
+        callable $head,
+        callable ...$tail
+    ): callable {
         switch (count($tail)) {
             case 0:
                 return $head;
@@ -41,24 +43,10 @@ final class Functions
                 $tail = $tail[0];
                 break;
             default:
-                $tail = self::and(...$tail);
+                $tail = self::alternatives(...$tail);
         }
-
         return function (string $input) use ($head, $tail): ?r {
-            $head = $head($input);
-            if (null === $head) {
-                return null;
-            }
-
-            $tail = $tail($head->unparsed);
-            if (null === $tail) {
-                return null;
-            }
-
-            return r::make(
-                $tail->unparsed,
-                array_merge($head->parsed, $tail->parsed)
-            );
+            return $head($input) ?? $tail($input);
         };
     }
 
@@ -70,9 +58,9 @@ final class Functions
         /**
          * @var callable(string):?r<string>
          */
-        $digits = self::or(self::lit("0"), self::lit("1"));
+        $digits = self::alternatives(self::lit("0"), self::lit("1"));
 
-        $intString = self::and($digits, self::repeat($digits));
+        $intString = self::sequence($digits, self::repeat($digits));
 
         $intVal = function (string $d, int $a): array {
             return [($a << 1) | (int) $d];
@@ -93,9 +81,9 @@ final class Functions
         callable $end,
         callable $escape
     ): callable {
-        $muncher = self::and(self::not($end), self::pop());
-        $middle = self::or($escape, $muncher);
-        return self::and($start, self::repeat($middle), $end);
+        $muncher = self::sequence(self::not($end), self::pop());
+        $middle = self::alternatives($escape, $muncher);
+        return self::sequence($start, self::repeat($middle), $end);
     }
 
     /**
@@ -116,18 +104,15 @@ final class Functions
     }
 
     /**
-     * @param callable(string):?r $p
      * @return callable(string):?r
      */
-    public static function end(callable $p): callable
+    public static function end(): callable
     {
-        return function (string $in) use ($p): ?r {
-            $r = $p($in);
-
-            if (null === $r || '' !== $r->unparsed) {
-                return null;
+        return function (string $in): ?r {
+            if ('' === $in) {
+                return r::make('', []);
             } else {
-                return $r;
+                return null;
             }
         };
     }
@@ -137,7 +122,11 @@ final class Functions
      */
     public static function eol(): callable
     {
-        return self::or(self::lit("\n"), self::lit("\r\n"), self::lit("\r"));
+        return self::alternatives(
+            self::lit("\n"),
+            self::lit("\r\n"),
+            self::lit("\r")
+        );
     }
 
     /**
@@ -156,9 +145,15 @@ final class Functions
     public static function float(): callable
     {
         //mantissa and fractional integer's may have leading zeros
-        $zeros_integer = self::or(
-            self::and(self::drop(self::repeat(self::lit("0"))), self::int()),
-            self::and(self::int(), self::drop(self::repeat(self::lit("0"))))
+        $zeros_integer = self::alternatives(
+            self::sequence(
+                self::drop(self::repeat(self::lit("0"))),
+                self::int()
+            ),
+            self::sequence(
+                self::int(),
+                self::drop(self::repeat(self::lit("0")))
+            )
         );
 
         $fractional_part = self::map(function (int $q): float {
@@ -168,14 +163,14 @@ final class Functions
         $integer_part = self::map('floatval', self::int());
 
         // parse a non-scientific float into integer and decimal parts
-        $parts = self::or(
-            self::and(
+        $parts = self::alternatives(
+            self::sequence(
                 $integer_part,
                 self::drop(self::lit(".")),
                 $fractional_part
             ),
-            self::and($integer_part, self::drop(self::lit("."))),
-            self::and(self::drop(self::lit(".")), $fractional_part)
+            self::sequence($integer_part, self::drop(self::lit("."))),
+            self::sequence(self::drop(self::lit(".")), $fractional_part)
         );
         $float = self::fold(
             /** @return array{0:float} */ function (float $p, float $i): array {
@@ -185,30 +180,34 @@ final class Functions
             $parts
         );
 
-        $e = self::drop(self::or(self::lit("e"), self::lit("E")));
+        $e = self::drop(self::alternatives(self::lit("e"), self::lit("E")));
 
         $negative_integer = self::map(function (int $i): int {
             return -$i;
-        }, self::and(self::drop(self::lit("-")), $zeros_integer));
-        $positive_integer = self::and(
+        }, self::sequence(self::drop(self::lit("-")), $zeros_integer));
+        $positive_integer = self::sequence(
             self::drop(self::lit("+")),
             $zeros_integer
         );
         $mantissa = self::map(function (int $i): float {
             return pow(10, $i);
-        }, self::and(
+        }, self::sequence(
             $e,
-            self::or($zeros_integer, $negative_integer, $positive_integer)
+            self::alternatives(
+                $zeros_integer,
+                $negative_integer,
+                $positive_integer
+            )
         ));
         $scientific = self::fold(
             /** @return array{0:float} */ function (float $a, float $b): array {
                 return [$a * $b];
             },
             [1],
-            self::and(self::or($float, $integer_part), $mantissa)
+            self::sequence(self::alternatives($float, $integer_part), $mantissa)
         );
 
-        return self::or($scientific, $float);
+        return self::alternatives($scientific, $float);
     }
 
     /**
@@ -264,14 +263,14 @@ final class Functions
             array_map(self::lit, range("A", "F"))
         );
 
-        $dec = self::map('intval', self::or(...$decLits));
+        $dec = self::map('intval', self::alternatives(...$decLits));
         $hex = self::map(function (string $v): int {
             return 9 + (0xf & ord($v));
-        }, self::or(...$hexLits));
+        }, self::alternatives(...$hexLits));
 
-        $digits = self::or($dec, $hex);
+        $digits = self::alternatives($dec, $hex);
 
-        $hexSequence = self::and($digits, self::repeat($digits));
+        $hexSequence = self::sequence($digits, self::repeat($digits));
 
         $hexVal = function (int $d, int $a): array {
             return [$a * 0x10 + $d];
@@ -290,11 +289,11 @@ final class Functions
          */
         $firstLits = array_map(self::lit, range("1", "9"));
         $zeroLit = self::lit("0");
-        $firstDigits = self::or(...$firstLits);
-        $digits = self::or($zeroLit, ...$firstLits);
+        $firstDigits = self::alternatives(...$firstLits);
+        $digits = self::alternatives($zeroLit, ...$firstLits);
 
-        $intString = self::or(
-            self::and($firstDigits, self::repeat($digits)),
+        $intString = self::alternatives(
+            self::sequence($firstDigits, self::repeat($digits)),
             $zeroLit
         );
 
@@ -382,36 +381,15 @@ final class Functions
          * @var array<int, callable(string):?r<string>>
          */
         $digitLits = array_map(self::lit, range("0", "7"));
-        $digits = self::or(...$digitLits);
+        $digits = self::alternatives(...$digitLits);
 
-        $intString = self::and($digits, self::repeat($digits));
+        $intString = self::sequence($digits, self::repeat($digits));
 
         $intVal = function (string $d, int $a): array {
             return [$a * 010 + (int) $d];
         };
 
         return self::fold($intVal, [0], $intString);
-    }
-
-    /**
-     * @param callable(string):?r $head
-     * @param callable(string):?r ...$tail
-     * @return callable(string):?r
-     */
-    public static function or(callable $head, callable ...$tail): callable
-    {
-        switch (count($tail)) {
-            case 0:
-                return $head;
-            case 1:
-                $tail = $tail[0];
-                break;
-            default:
-                $tail = self::or(...$tail);
-        }
-        return function (string $input) use ($head, $tail): ?r {
-            return $head($input) ?? $tail($input);
-        };
     }
 
     /**
@@ -454,9 +432,9 @@ final class Functions
      */
     public static function spaces(): callable
     {
-        $space = self::or(self::lit(" "), self::lit("\t"));
+        $space = self::alternatives(self::lit(" "), self::lit("\t"));
 
-        return self::and($space, self::repeat($space));
+        return self::sequence($space, self::repeat($space));
     }
 
     /**
@@ -464,7 +442,42 @@ final class Functions
      */
     public static function whitespace(): callable
     {
-        $ws = self::or(self::spaces(), self::eol());
-        return self::and($ws, self::repeat($ws));
+        $ws = self::alternatives(self::spaces(), self::eol());
+        return self::sequence($ws, self::repeat($ws));
+    }
+
+    /**
+     * @param callable(string):?r $head
+     * @param array<int,callable(string):?r> $tail
+     * @return callable(string):?r
+     */
+    public static function sequence(callable $head, callable ...$tail): callable
+    {
+        switch (count($tail)) {
+            case 0:
+                return $head;
+            case 1:
+                $tail = $tail[0];
+                break;
+            default:
+                $tail = self::sequence(...$tail);
+        }
+
+        return function (string $input) use ($head, $tail): ?r {
+            $head = $head($input);
+            if (null === $head) {
+                return null;
+            }
+
+            $tail = $tail($head->unparsed);
+            if (null === $tail) {
+                return null;
+            }
+
+            return r::make(
+                $tail->unparsed,
+                array_merge($head->parsed, $tail->parsed)
+            );
+        };
     }
 }

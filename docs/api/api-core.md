@@ -5,17 +5,7 @@ title: "API: Core"
 
 ## Bring it in
 
-We provide two equivalent APIs. One "functional programming" (FP) and one "object oriented programming" (OOP). Neither is better. we have tried to make the object API have natural language patterns, while the functional API should have more consistent (orthogonal) patterns.
-
-Choose your own adventure
-
-#### OOP
-
-```php
-use Phap\Oop as p;
-```
-
-#### FP
+First, you must obviously tell PHP to use the new hotness.
 
 ```php
 use Phap\Functions as p;
@@ -29,49 +19,24 @@ If the parse fails then you get back a `null`.
 
 If the parse succeeds, then you get back a `Phap\Result`. This result object has two read only properties: `parsed` and `unparsed`. The former is an array, the latter is a string.
 
-## `and`
+## `alternatives`
 
-This command checks for a sequence of matches, returning success only if all children parsers also return success.
-
-#### OOP
+Tries a list of parsers in order until one succeeds.
 
 ```php
-// parse "foobar"
-$parser = p::lit("foo")->and(p::lit("bar"));
+$parser = p::alternatives(p::lit("foo"), p::lit("hello"));
 
 $success = $parser("foobar");
-$fail = $parser("zoobaz");
-```
-
-#### FP
-
-```php
-// parse "foobar"
-$parser = p::and(p::lit("foo"), p::lit("bar"));
-
-$success = $parser("foobar");
-$fail = $parser("zoobaz");
+$success = $parser("hello world");
 ```
 
 ## `drop`
 
-This functional discards the parsed data. This might be useful for dropping whitespace for example.
-
-#### OOP
+This function discards the parsed data. This might be useful for dropping whitespace for example.
 
 ```php
 // parse "foo bar" into ["foo", "bar"]
-$parser = p::lit("foo")->and(p::lit(" ")->drop(), p::lit("bar"));
-
-$success = $parser("foo bar");
-$fail = $parser("foobar");
-```
-
-#### FP
-
-```php
-// parse "foo bar" into ["foo", "bar"]
-$parser = p::and(p::lit("foo"), p::drop(p::lit(" ")), p::lit("bar"));
+$parser = p::sequence(p::lit("foo"), p::drop(p::lit(" ")), p::lit("bar"));
 
 $success = $parser("foo bar");
 $fail = $parser("foobar");
@@ -80,17 +45,6 @@ $fail = $parser("foobar");
 ## `end`
 
 This will check to see if we are at the end of input. Success means there is nothing left to parse.
-
-#### OOP
-
-```php
-$parser = p::lit("foo")->end();
-
-$success = $parser("foo");
-$failure = $parser("foobar");
-```
-
-#### FP
 
 ```php
 $parser = p::end(p::lit("foo"));
@@ -103,8 +57,6 @@ $failure = $parser("foobar");
 
 Always fails.
 
-#### OOP and FP
-
 ```php
 $parser = p::fail();
 
@@ -115,24 +67,9 @@ assert(null === $parser("foo"));
 
 Similar to `array_reduce`, this function can be used to combine values. For example, you might want to turn the array `["1","2","3"]` into the integer `123`.
 
-#### OOP
-
 ```php
 $flower = p::lit("flower");
-$flowers = $flower->and($flower);
-
-$parser = $flowers->fold(function (string $in, string ...$acc): array {
-    return ["flowers"];
-}, []);
-
-assert(["flowers"] === $parser("flowerflower"));
-```
-
-#### FP
-
-```php
-$flower = p::lit("flower");
-$flowers = p::and($flower, $flower);
+$flowers = p::sequence($flower, $flower);
 
 $parser = p::fold(
     function (string $in, string ...$acc): array {
@@ -149,8 +86,6 @@ assert(["flowers"] === $parser("flowerflower"));
 
 Checks to see if the unparsed data starts with the *lit*eral.
 
-#### OOP and FP
-
 ```php
 $parser = p::lit("foo");
 
@@ -161,19 +96,6 @@ $fail = $parser("bar");
 ## `map`
 
 This is used to convert raw data to more useful types. For example you might wish to convert a string containing an integer into an actual integer.
-
-#### OOP
-
-```php
-// convert a "truthy" string to boolean
-$parser = p::lit("yes")->map(function (string $s): bool {
-    return true;
-});
-
-assert([true] == $parser("yes")->parsed);
-```
-
-#### FP
 
 ```php
 // convert a "truthy" string to boolean
@@ -188,8 +110,6 @@ assert([true] == $parser("yes")->parsed);
 
 Fails if the given parser is successful. Succeeds if not.
 
-#### OOP and FP
-
 ```php
 $parser = p::not(p::lit("foo"));
 
@@ -198,33 +118,9 @@ assert([] === $parser("bar")->parsed);
 assert("bar" === $parser("bar")->unparsed);
 ```
 
-## `or`
-
-Tries a list of parsers in order until one succeeds.
-
-#### OOP
-
-```php
-$parser = p::lit("foo")->or(p::lit("hello"));
-
-$success = $parser("foobar");
-$success = $parser("hello world");
-```
-
-#### FP
-
-```php
-$parser = p::or(p::lit("foo"), p::lit("hello"));
-
-$success = $parser("foobar");
-$success = $parser("hello world");
-```
-
 ## `pop`
 
 Grab a single item off of the parser input.
-
-#### OOP and FP
 
 ```php
 $parser = p::pop();
@@ -236,18 +132,20 @@ assert(["1"] === $parser("123"));
 
 Just keep trying the same parser until it fails.
 
-#### OOP
-
-```php
-$parser = p::lit("1")->repeat();
-
-assert(["1", "1", "1"] === $parser("111"));
-```
-
-#### FP
-
 ```php
 $parser = p::repeat(p::lit("1"));
 
 assert(["1", "1", "1"] === $parser("111"));
+```
+
+## `sequence`
+
+This command checks for a sequence of matches, returning success only if all children parsers also return success.
+
+```php
+// parse "foobar"
+$parser = p::sequence(p::lit("foo"), p::lit("bar"));
+
+$success = $parser("foobar");
+$fail = $parser("zoobaz");
 ```

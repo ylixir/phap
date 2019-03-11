@@ -11,8 +11,6 @@ Please visit the `core` documentation first to see how to use the library. This 
 
 This parses a sequence of binary digits converting them to an `int`.
 
-#### OOP and FP
-
 ```php
 $parser = p::binary();
 
@@ -43,8 +41,6 @@ $parser = p::block($cstart, $cend, p::fail());
 assert(["/*", "/", "*", "a", "*/"] === $parser("/*/*a*/")->parsed);
 ```
 
-#### OOP and FP
-
 ```php
 $parser = p::binary();
 
@@ -63,8 +59,6 @@ assert(null === $parser("-100")->parsed);
 
 This parses an end of line. This might be dos, unix, or mac encoding.
 
-#### OOP and FP
-
 ```php
 $parser = p::eol();
 
@@ -82,8 +76,6 @@ assert(null === $parser("")->parsed);
 ## `float`
 
 This parses a series of decimal digits, periods, and the letter `e`, returning a `float`.
-
-#### OOP and FP
 
 ```php
 $parser = p::float();
@@ -112,8 +104,6 @@ assert(null === $parser(""));
 
 This parses a sequence of hexadecimal digits converting them to an `int`.
 
-#### OOP and FP
-
 ```php
 $parser = p::hex();
 
@@ -133,8 +123,6 @@ assert(null === $parser("-123")->parsed);
 ## `int`
 
 This parses a sequence of decimal digits converting them to an `int`.
-
-#### OOP and FP
 
 ```php
 $parser = p::int();
@@ -156,8 +144,6 @@ assert(null === $parser("00")->parsed);
 
 This parses a sequence of octal digits converting them to an `int`.
 
-#### OOP and FP
-
 ```php
 $parser = p::octal();
 
@@ -177,8 +163,6 @@ assert(null === $parser("")->parsed);
 
 This parses a sequence of spaces and tabs.
 
-#### OOP and FP
-
 ```php
 $parser = p::spaces();
 
@@ -190,8 +174,6 @@ assert(null === $parser("")->parsed);
 ## `whitespace`
 
 This parses a sequence of spaces, tabs and newlines.
-
-#### OOP and FP
 
 ```php
 $parser = p::whitespace();

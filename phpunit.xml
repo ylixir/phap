@@ -4,8 +4,7 @@
       <directory>test/Unit</directory>
     </testsuite>
     <testsuite name="Integration">
-      <file>test/Integration/functional_examples.php</file>
-      <file>test/Integration/OopExamples.php</file>
+      <directory>test/Integration</directory>
     </testsuite>
   </testsuites>
 </phpunit>
