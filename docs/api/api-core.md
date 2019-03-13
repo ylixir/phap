@@ -3,13 +3,11 @@ layout: page
 title: "API: Core"
 ---
 
-## Bring it in
+First, you must tell PHP to use the new hotness. See the [getting started section](/tutorial/getting-started) section for more information.
 
-First, you must obviously tell PHP to use the new hotness.
-
-```php
-use Phap\Functions as p;
-```
+<!-- prettier-ignore -->
+1. Table of Contents
+{:toc}
 
 # What you get
 
@@ -18,6 +16,8 @@ Each parser combinator returns an object that you can call like a function. You 
 If the parse fails then you get back a `null`.
 
 If the parse succeeds, then you get back a `Phap\Result`. This result object has two read only properties: `parsed` and `unparsed`. The former is an array, the latter is a string.
+
+# Core API functions
 
 ## `alternatives`
 

@@ -3,9 +3,11 @@ layout: page
 title: "API: Extra"
 ---
 
-## Bring it in
+Please visit the [core documentation](/api/api-core) first to see how to use the core library. This page provides documentation on some handy quality of life functions.
 
-Please visit the `core` documentation first to see how to use the library. This page provides documentation on some handy quality of life functions.
+<!-- prettier-ignore -->
+1. Table of Contents
+{:toc}
 
 ## `binary`
 
