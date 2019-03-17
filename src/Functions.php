@@ -8,6 +8,7 @@ final class Functions
 {
     //convenience constants for passing functions to functions
     const alternatives = self::class . "::alternatives";
+    const apply = self::class . "::apply";
     const binary = self::class . "::binary";
     const drop = self::class . "::drop";
     const end = self::class . "::end";
@@ -47,6 +48,25 @@ final class Functions
         }
         return function (string $input) use ($head, $tail): ?r {
             return $head($input) ?? $tail($input);
+        };
+    }
+
+    /**
+     * @template S
+     * @template T
+     * @param callable(T...):array<int,S> $f
+     * @param callable(string):?r $p
+     * @return callable(string):?r
+     */
+    public static function apply(callable $f, callable $p): callable
+    {
+        return function (string $in) use ($f, $p): ?r {
+            $r = $p($in);
+            if (null === $r) {
+                return $r;
+            } else {
+                return r::make($r->unparsed, $f(...$r->parsed));
+            }
         };
     }
 

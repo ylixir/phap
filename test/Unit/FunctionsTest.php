@@ -57,6 +57,42 @@ class FunctionsTest extends TestCase
             ],
         ];
     }
+
+    public function apply_provider(): array
+    {
+        $apply =
+            /**
+             * @param array<int,string> $s
+             * @return array<int,string>
+             */
+            function (string ...$s): array {
+                $a = [];
+                foreach ($s as $v) {
+                    if ('2' !== $v) {
+                        $a[] = $v;
+                    }
+                }
+
+                return $a;
+            };
+        return [
+            ["123", $apply, p::lit("2"), null],
+            ["123", $apply, p::repeat(p::pop()), r::make("", ["1", "3"])],
+        ];
+    }
+    /**
+     * @dataProvider apply_provider
+     */
+    public function test_apply(
+        string $input,
+        callable $f,
+        callable $parser,
+        ?r $expected
+    ): void {
+        $actual = p::apply($f, $parser)($input);
+        $this->assertEquals($expected, $actual);
+    }
+
     /**
      * @dataProvider block_provider
      */

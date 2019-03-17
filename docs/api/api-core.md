@@ -30,6 +30,21 @@ $success = $parser("foobar");
 $success = $parser("hello world");
 ```
 
+## `apply`
+
+Similar to `map`, this function can be used to transform values from one type to another. However, unlike map, this function operates on all parsed tokens at once. For example, you might want to turn the array `["1","2","3"]` into an array with containing only the integer `123`.
+
+```php
+$flower = p::lit("flower");
+$flowers = p::sequence($flower, $flower);
+
+$parser = p::apply(function (string ...$in): array {
+    return ["flowers"];
+}, $flowers);
+
+assert(["flowers"] === $parser("flowerflower"));
+```
+
 ## `drop`
 
 This function discards the parsed data. This might be useful for dropping whitespace for example.
