@@ -2,7 +2,7 @@
 
 [![Build Status](https://www.travis-ci.com/ylixir/phap.svg?branch=master)](https://www.travis-ci.com/ylixir/phap)
 
-[![Waffle.io - Columns and their card count](https://badge.waffle.io/ylixir/phap.svg?columns=all)](https://waffle.io/ylixir/phap)
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/ylixir/phap.svg?columns=all)](https://waffle.io/ylixir/phap) [![Join the chat at https://gitter.im/ylixir/phap](https://badges.gitter.im/ylixir/phap.svg)](https://gitter.im/ylixir/phap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This project aims to build a simple, easy, and lightweight parser library.
 
