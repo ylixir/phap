@@ -29,6 +29,7 @@ Now just add the following to any `.php` file where you wish to use `phap`
 
 ```php
 use Phap\Functions as p;
+use Phap\Result as r; //this is what a parser resutrns
 ```
 
 **Note:** This allows you to more access `phap` by aliasing it to the letter `p`. This may or may not be your preference, but we will use this convention

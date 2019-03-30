@@ -9,6 +9,42 @@ use PHPUnit\Framework\TestCase;
 class JsonTest extends TestCase
 {
     /**
+     * @return callable(string):?r
+     */
+    public static function parse_ucs2(): callable
+    {
+        /** @var array<int,callable(string):?r> */
+        $hexDigits = array_merge(
+            array_map(p::lit, range('0', '9')),
+            array_map(p::lit, range('a', 'z')),
+            array_map(p::lit, range('A', 'Z'))
+        );
+        $hexDigit = p::alternatives(...$hexDigits);
+
+        $unicode = p::sequence(
+            $hexDigit,
+            $hexDigit,
+            $hexDigit,
+            $hexDigit
+        );
+
+        $unicode = p::apply(
+            /**
+             * @param array{0:string,1:string,2:string,3:string} $digits
+             * @return array{0:string}
+             */
+            function (string ...$digits): array {
+                $ucs2 = join('', $digits);
+                $utf8 = iconv('UCS-2', 'UTF-8', $ucs2);
+                return [$utf8];
+            },
+            $unicode
+        );
+
+        return $unicode;
+    }
+
+    /**
      * @return null|bool|number|string|array|object
      */
     public static function parse_json(string $s)
@@ -53,30 +89,7 @@ class JsonTest extends TestCase
          * finally we flatten from array to string
          */
 
-        /** @var array<int,callable(string):?r> */
-        $hexDigits = array_merge(
-            array_map(p::lit, range(0, 9)),
-            array_map(p::lit, range('a', 'z')),
-            array_map(p::lit, range('A', 'Z'))
-        );
-        $hexDigit = p::alternatives(...$hexDigits);
-        $unicode = p::sequence(
-            p::drop(p::lit("u")),
-            $hexDigit,
-            $hexDigit,
-            $hexDigit,
-            $hexDigit
-        );
-        $unicode = p::fold(
-            function (string $digit, string $digits): array {
-                return [$digits . $digit];
-            },
-            [''],
-            $unicode
-        );
-        $unicode = p::map(function (string $s): string {
-            return iconv('UCS-2', 'UTF-8', $s);
-        }, $unicode);
+        $unicode = p::sequence(p::drop(p::lit("u")), self::parse_ucs2());
 
         $literalsMap = [
             "\"" => "\"",
@@ -120,13 +133,9 @@ class JsonTest extends TestCase
             $string,
             p::drop(p::lit("\""))
         );
-        $string = p::fold(
-            function (string $new, string $old): array {
-                return [$old . $new];
-            },
-            [''],
-            $string
-        );
+        $string = p::apply(function (string ...$pieces): array {
+            return [join('', $pieces)];
+        }, $string);
 
         /**
          * this parser basically just eats whitespace
@@ -178,31 +187,24 @@ class JsonTest extends TestCase
             p::alternatives($array, $empty),
             p::drop(p::lit("]"))
         );
-        $array = p::fold(
-            /** @param mixed $new */
-            function ($new, array $old): array {
-                $result = array_merge($old, [$new]);
-                return [$result];
-            },
-            [[]],
-            $array
-        );
+        $array = p::apply(function (...$a): array {
+            return [$a];
+        }, $array);
 
         $key = p::sequence($empty, $string, $empty);
         //an object is made up of key value pairs
         $keyValue = p::sequence($key, p::drop(p::lit(":")), $value);
         //we flatten the key value pairs to actually be pairs
-        $keyValue = p::fold(
-            /** @param mixed $new */
-            function ($new, array $old): array {
-                return [array_merge($old, [$new])];
+        $keyValue = p::apply(
+            /**
+             * @param mixed $value
+             * @return array<int,array<string,mixed>>
+             */
+            function (string $key, $value): array {
+                return [[$key => $value]];
             },
-            [[]],
             $keyValue
         );
-        $keyValue = p::map(function (array $pair): array {
-            return [$pair[0] => $pair[1]];
-        }, $keyValue);
         $object = p::sequence(
             $keyValue,
             p::repeat(p::sequence(p::drop(p::lit(",")), $keyValue))
@@ -212,15 +214,12 @@ class JsonTest extends TestCase
             p::alternatives($object, $empty),
             p::drop(p::lit("}"))
         );
-        $object = p::fold(
-            function (array $new, array $old): array {
-                return [array_merge($old, $new)];
-            },
-            [[]],
-            $object
-        );
-        $object = p::map(function (array $object): object {
-            return (object) $object;
+        $object = p::apply(function (array ...$kvs): array {
+            if ([] === $kvs) {
+                return [(object) []];
+            } else {
+                return [(object) array_merge(...$kvs)];
+            }
         }, $object);
 
         return p::sequence($value, p::end())($s)->parsed ?? null;
